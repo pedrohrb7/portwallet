@@ -80,6 +80,8 @@ O Nginx expõe apenas `/api/` e `/actuator/health`; o resto do Actuator não sai
 
 Registradas no [ADR 0002](../../adr/0002-fundacao-stack-e-estrutura.md).
 
+**Revisão do CI (Fase 2):** o pipeline passou a rodar só em `push` no `main` e só quando há mudança de código. Um job `changes` (`dorny/paths-filter`, fixado pelo SHA do commit da v4.0.3) decide quais jobs rodam: backend com `backend/`, frontend com `frontend/`, E2E com qualquer um dos dois e Docker também com `docker-compose.yml`; uma mudança no próprio workflow roda tudo. Jobs pulados aparecem como "skipped", o que não trava checks obrigatórios. O E2E passou a gerar o jar do backend no próprio job, porque o job de backend pode ter sido pulado.
+
 ## Questões em aberto
 
 - Nenhuma. O pipeline rodou verde no GitHub Actions.

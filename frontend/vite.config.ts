@@ -13,6 +13,7 @@ export default defineConfig({
     proxy: {
       '/api': apiTarget,
       '/actuator/health': apiTarget,
+      '/mock': apiTarget,
     },
   },
   test: {

@@ -1,8 +1,10 @@
 name: CI
 
+# Runs on pushes to main only. Each job runs only when the code it checks changed;
+# changes limited to docs (docs/, *.md, PRD.md) skip the whole pipeline.
 on:
   push:
-  pull_request:
+    branches: [main]
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -12,8 +14,43 @@ permissions:
   contents: read
 
 jobs:
+  changes:
+    name: Detectar mudanças
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      app: ${{ steps.filter.outputs.app }}
+      docker: ${{ steps.filter.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v7
+      # Third-party action pinned to the commit of v4.0.3, so a moved tag cannot change what runs here.
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          filters: |
+            workflow: &workflow
+              - '.github/workflows/ci.yml'
+            backend:
+              - *workflow
+              - 'backend/**'
+            frontend:
+              - *workflow
+              - 'frontend/**'
+            app:
+              - *workflow
+              - 'backend/**'
+              - 'frontend/**'
+            docker:
+              - *workflow
+              - 'backend/**'
+              - 'frontend/**'
+              - 'docker-compose.yml'
+
   backend:
     name: Backend (build e testes)
+    needs: changes
+    if: needs.changes.outputs.backend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -27,11 +64,6 @@ jobs:
           cache: maven
       - run: ./mvnw -B -ntp verify
       - uses: actions/upload-artifact@v7
-        with:
-          name: backend-jar
-          path: backend/target/portwallet-backend.jar
-          retention-days: 1
-      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: backend-coverage
@@ -39,6 +71,8 @@ jobs:
 
   frontend:
     name: Frontend (lint, tipos, testes e build)
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -59,29 +93,37 @@ jobs:
 
   e2e:
     name: E2E (Playwright)
-    needs: [backend, frontend]
+    needs: [changes, backend, frontend]
+    # Runs when either side changed, as long as the checks that did run passed. A skipped
+    # backend or frontend job (nothing changed there) does not block the E2E suite.
+    if: >-
+      always() &&
+      needs.changes.outputs.app == 'true' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
+          cache: maven
       - uses: actions/setup-node@v7
         with:
           node-version-file: frontend/.nvmrc
           cache: npm
           cache-dependency-path: frontend/package-lock.json
-      - uses: actions/download-artifact@v8
-        with:
-          name: backend-jar
-          path: backend/target
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium firefox
-      - run: npm run e2e
+      # Built here instead of downloaded from the backend job, which is skipped when only the frontend changed.
+      - name: Build backend jar
+        working-directory: backend
+        run: ./mvnw -B -ntp -DskipTests package
+      - working-directory: frontend
+        run: npm ci
+      - working-directory: frontend
+        run: npx playwright install --with-deps chromium firefox
+      - working-directory: frontend
+        run: npm run e2e
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -91,6 +133,8 @@ jobs:
 
   docker:
     name: Docker Compose (smoke test)
+    needs: changes
+    if: needs.changes.outputs.docker == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

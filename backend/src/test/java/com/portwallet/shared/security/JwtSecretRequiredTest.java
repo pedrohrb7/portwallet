@@ -13,7 +13,10 @@ class JwtSecretRequiredTest {
     @Test
     void applicationDoesNotStartWithoutSecretOutsideDevelopmentProfiles() {
         SpringApplicationBuilder app = new SpringApplicationBuilder(PortWalletApplication.class);
-        assertThatThrownBy(() -> app.run("--spring.profiles.active=production-like", "--server.port=0"))
+        // Crypto keys are provided so that the missing JWT secret is the only problem.
+        assertThatThrownBy(() -> app.run("--spring.profiles.active=production-like", "--server.port=0",
+                        "--portwallet.crypto.encryption-key=CofGSDsX497EScRUIT4I7b9wYzLr8TpTa1OV+rerNT0=",
+                        "--portwallet.crypto.blind-index-key=21ONoO2JoA/oTp0Mws+VCh4rLMokzUTNQnUA07D+c8c="))
                 .rootCause()
                 .hasMessageContaining("JWT_SECRET must be set");
     }

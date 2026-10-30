@@ -34,6 +34,13 @@ describe('toProblem', () => {
     })
   })
 
+  it('keeps a value that is already a Problem', () => {
+    expect(toProblem({ type: 'invalid-token', status: 400 })).toEqual({
+      type: 'invalid-token',
+      status: 400,
+    })
+  })
+
   it('maps non-axios errors to an internal error', () => {
     expect(toProblem(new Error('boom')).type).toBe('internal-error')
   })

@@ -5,6 +5,8 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm npm ci
 COPY . .
+ARG VITE_DEMO_INBOX=false
+ENV VITE_DEMO_INBOX=${VITE_DEMO_INBOX}
 RUN npm run build
 
 FROM nginx:1.29-alpine

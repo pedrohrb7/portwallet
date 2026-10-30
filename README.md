@@ -28,7 +28,20 @@ docker compose up --build
 
 Acesse <http://localhost:3000>. A porta pode ser trocada com `WEB_PORT=8000 docker compose up --build`.
 
-O compose sobe a API no perfil `demo` e passa a ela um segredo de JWT de demonstração. Fora de uma demo local, defina `JWT_SECRET` com no mínimo 32 bytes. Sem um segredo, a API só sobe nos perfis `dev` e `e2e`, que têm um segredo de desenvolvimento próprio.
+O compose sobe a API no perfil `demo`. Nesse perfil, os e-mails (como o link de ativação da conta) chegam na **caixa de entrada demo**, em <http://localhost:3000/inbox>.
+
+### Variáveis de ambiente
+
+O compose já passa valores de demonstração para todas elas. Fora de uma demo local, defina valores próprios: sem eles, a API só sobe nos perfis `dev` e `e2e`, que têm valores de desenvolvimento.
+
+| Variável | Uso |
+| --- | --- |
+| `JWT_SECRET` | Segredo do access token (HS256), com no mínimo 32 bytes |
+| `PORTWALLET_CRYPTO_ENCRYPTION_KEY` | Chave AES-256-GCM dos campos cifrados (CPF): 32 bytes em Base64 |
+| `PORTWALLET_CRYPTO_BLIND_INDEX_KEY` | Chave HMAC-SHA256 do blind index do CPF: 32 bytes em Base64, diferente da anterior |
+| `APP_BASE_URL` | Endereço público do frontend, usado nos links enviados por e-mail |
+
+Para gerar uma chave: `openssl rand -base64 32`.
 
 ## Versões fixadas
 
@@ -66,7 +79,7 @@ cd backend
 ./mvnw verify                                           # testes + cobertura (target/site/jacoco)
 ```
 
-No perfil `dev`, o console do H2 fica em <http://localhost:8080/h2-console> (JDBC URL `jdbc:h2:mem:portwallet`, usuário `sa`, sem senha).
+No perfil `dev`, o console do H2 fica em <http://localhost:8080/h2-console> (JDBC URL `jdbc:h2:mem:portwallet`, usuário `sa`, sem senha). Os e-mails simulados ficam na caixa de entrada demo, em <http://localhost:5173/inbox> com o frontend rodando.
 
 ### Frontend
 
@@ -121,9 +134,13 @@ O documento OpenAPI 3.1 fica em `/v3/api-docs`. Para chamar endpoints protegidos
 
 ## CI
 
-O GitHub Actions roda a cada push e pull request:
+O GitHub Actions roda a cada push no `main`. Um primeiro job detecta o que mudou, e cada verificação só roda quando o código que ela cobre mudou. Mudanças só em documentação (`docs/`, arquivos `.md`) não disparam nenhuma verificação.
 
-- **Backend:** `./mvnw verify` (testes e relatório de cobertura JaCoCo).
-- **Frontend:** lint, formatação, tipos, testes unitários e build.
-- **E2E:** Playwright em Chromium e Firefox contra o jar do backend; o relatório HTML é publicado como artefato.
-- **Docker:** sobe o `docker compose` e verifica o health pela borda do Nginx.
+| Job | O que faz | Roda quando muda |
+| --- | --- | --- |
+| **Backend** | `./mvnw verify` (testes e relatório de cobertura JaCoCo) | `backend/` |
+| **Frontend** | Lint, formatação, tipos, testes unitários e build | `frontend/` |
+| **E2E** | Playwright em Chromium e Firefox contra o backend; o relatório HTML é publicado como artefato | `backend/` ou `frontend/` |
+| **Docker** | Sobe o `docker compose` e verifica o health pela borda do Nginx | `backend/`, `frontend/` ou `docker-compose.yml` |
+
+Qualquer mudança no próprio workflow (`.github/workflows/ci.yml`) roda todos os jobs. Um job pulado aparece como "skipped", e o E2E roda mesmo que o backend ou o frontend tenham sido pulados, desde que nenhum job executado tenha falhado.

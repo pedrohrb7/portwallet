@@ -37,10 +37,19 @@ management:
         enabled: true
 
 portwallet:
+  # Public address of the frontend, used to build the links sent by e-mail.
+  app-base-url: ${APP_BASE_URL:http://localhost:5173}
   security:
     jwt:
       secret: ${JWT_SECRET:}
       access-token-ttl: PT15M
+  crypto:
+    encryption-key: ${PORTWALLET_CRYPTO_ENCRYPTION_KEY:}
+    blind-index-key: ${PORTWALLET_CRYPTO_BLIND_INDEX_KEY:}
+  mock:
+    inbox:
+      # Demo inbox (/mock/inbox) where simulated e-mails land. Only in dev, e2e and demo.
+      enabled: false
 
 # API docs exist only in the dev and demo profiles (see docs/features/rnf-documentacao-api).
 springdoc:
@@ -51,6 +60,8 @@ springdoc:
     enabled: false
     path: /swagger-ui
   paths-to-match: /api/v1/**
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json
 
 ---
 spring:
@@ -72,6 +83,20 @@ portwallet:
     jwt:
       # INSECURE: development-only secret. Real environments must set JWT_SECRET.
       secret: ${JWT_SECRET:dev-only-insecure-jwt-secret-0123456789abcdef}
+  crypto:
+    # INSECURE: development-only keys. Real environments must set the PORTWALLET_CRYPTO_* variables.
+    encryption-key: ${PORTWALLET_CRYPTO_ENCRYPTION_KEY:xAKgggRwSyj3FKLfZkTXmgehp5CGm4ivSjaqAEKkUk0=}
+    blind-index-key: ${PORTWALLET_CRYPTO_BLIND_INDEX_KEY:g3Q6MlGpMWJKFikY6uXcA0I0anBiZCEZq/myTN8R/2g=}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev | e2e | demo
+portwallet:
+  mock:
+    inbox:
+      enabled: true
 
 ---
 spring:

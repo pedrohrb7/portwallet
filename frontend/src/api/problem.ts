@@ -20,6 +20,7 @@ const messages: Record<string, string> = {
   'invalid-token': 'Link inválido ou expirado.',
   unauthorized: 'Sua sessão expirou. Entre novamente.',
   'invalid-credentials': 'E-mail ou senha inválidos.',
+  'wrong-password': 'Senha incorreta. Use a senha escolhida no cadastro mais recente.',
   'invalid-refresh-token': 'Sua sessão expirou. Entre novamente.',
   forbidden: 'Você não tem permissão para acessar isto.',
   'account-blocked': 'Sua conta está bloqueada para movimentações.',
@@ -46,6 +47,9 @@ function isProblem(value: unknown): value is Problem {
 
 /** Normalizes any error thrown by the API client into a Problem. */
 export function toProblem(error: unknown): Problem {
+  if (isProblem(error)) {
+    return error
+  }
   if (isAxiosError(error)) {
     if (!error.response) {
       return { type: NETWORK_ERROR, status: 0 }

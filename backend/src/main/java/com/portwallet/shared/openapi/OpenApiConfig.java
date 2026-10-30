@@ -1,9 +1,12 @@
 package com.portwallet.shared.openapi;
 
 import com.portwallet.shared.money.Money;
+import com.portwallet.shared.security.AuthenticatedUser;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Operation;
+import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.ArraySchema;
 import io.swagger.v3.oas.models.media.Content;
@@ -17,13 +20,22 @@ import io.swagger.v3.oas.models.responses.ApiResponses;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.stream.Collectors;
 import org.springdoc.core.customizers.OpenApiCustomizer;
+import org.springdoc.core.customizers.OperationCustomizer;
 import org.springdoc.core.utils.SpringDocUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.MethodParameter;
+import org.springframework.web.method.HandlerMethod;
 
 /** OpenAPI document of the business API. Only active where springdoc is enabled (dev and demo profiles). */
 @Configuration(proxyBeanMethods = false)
@@ -34,11 +46,12 @@ public class OpenApiConfig {
     static final String PROBLEM_SCHEMA = "Problem";
     static final String PROBLEM_MEDIA_TYPE = "application/problem+json";
 
-    /** Errors any operation can return; each feature documents its specific ones (403, 404, 409, 422). */
-    private static final Map<String, String> COMMON_ERRORS = Map.of(
-            "400", "Dados inválidos (`validation-error`)",
-            "401", "Token ausente, inválido ou expirado (`unauthorized`)",
-            "500", "Erro inesperado (`internal-error`)");
+    private static final ProblemDoc VALIDATION_ERROR = new ProblemDoc(400, "validation-error", "Dados inválidos",
+            "Campos ou parâmetros inválidos; `errors` lista cada campo");
+    private static final ProblemDoc UNAUTHORIZED = new ProblemDoc(401, "unauthorized", "Autenticação necessária",
+            "Access token ausente, inválido ou expirado");
+    private static final ProblemDoc INTERNAL_ERROR = new ProblemDoc(500, "internal-error", "Erro inesperado",
+            "Erro inesperado; os detalhes ficam só no log");
 
     static {
         // Money is serialized as a string with two decimal places (ADR 0004), not as an object.
@@ -70,52 +83,128 @@ public class OpenApiConfig {
     }
 
     /**
-     * Adds the Problem schema together with the responses that reference it. Registering the schema in the
-     * {@link OpenAPI} bean instead is not enough: springdoc drops schemas that nothing references yet.
+     * Documents the errors of each operation: the ones it declares with {@link ApiProblem}, plus 400 when it takes
+     * input, 401 when it requires a token, and 500 always. Each error gets its own example, so a 422 never shows the
+     * example of a validation error.
      */
     @Bean
-    OpenApiCustomizer commonErrorResponses() {
+    OperationCustomizer problemResponses() {
+        return (operation, handlerMethod) -> {
+            List<ProblemDoc> problems = new ArrayList<>();
+            if (takesInput(handlerMethod)) {
+                problems.add(VALIDATION_ERROR);
+            }
+            if (!isPublic(handlerMethod)) {
+                problems.add(UNAUTHORIZED);
+            }
+            Arrays.stream(handlerMethod.getMethod().getAnnotationsByType(ApiProblem.class))
+                    .map(ProblemDoc::from)
+                    .forEach(problems::add);
+            problems.add(INTERNAL_ERROR);
+            addProblemResponses(operation, problems);
+            return operation;
+        };
+    }
+
+    /** Registers the Problem schema once something references it, and lists responses by status code. */
+    @Bean
+    OpenApiCustomizer problemSchemaAndResponseOrder() {
         return openApi -> {
             if (openApi.getPaths() == null || openApi.getPaths().isEmpty()) {
                 return;
             }
+            // Added here and not in the OpenAPI bean: springdoc drops schemas that nothing references yet.
             if (openApi.getComponents() == null) {
                 openApi.setComponents(new Components());
             }
             openApi.getComponents().addSchemas(PROBLEM_SCHEMA, problemSchema());
-            openApi.getPaths().values().forEach(path -> path.readOperations().forEach(this::addCommonErrors));
+            openApi.getPaths().values().forEach(path -> path.readOperations().forEach(OpenApiConfig::sortResponses));
         };
     }
 
-    private void addCommonErrors(Operation operation) {
+    private static void addProblemResponses(Operation operation, List<ProblemDoc> problems) {
         if (operation.getResponses() == null) {
             operation.setResponses(new ApiResponses());
         }
-        COMMON_ERRORS.forEach((status, description) ->
-                operation.getResponses().putIfAbsent(status, problemResponse(description)));
+        Map<Integer, List<ProblemDoc>> byStatus = problems.stream()
+                .collect(Collectors.groupingBy(ProblemDoc::status, TreeMap::new, Collectors.toList()));
+        byStatus.forEach((status, docs) -> {
+            MediaType mediaType = new MediaType().schema(new Schema<>().$ref("#/components/schemas/" + PROBLEM_SCHEMA));
+            docs.forEach(doc -> mediaType.addExamples(doc.type(), new Example()
+                    .summary(doc.type())
+                    .value(doc.example())));
+            // Markdown list, rendered by the Swagger UI: one line per problem type.
+            String description = docs.stream()
+                    .map(doc -> "- `" + doc.type() + "`: " + doc.description())
+                    .collect(Collectors.joining("\n"));
+            operation.getResponses().put(String.valueOf(status), new ApiResponse()
+                    .description(description)
+                    .content(new Content().addMediaType(PROBLEM_MEDIA_TYPE, mediaType)));
+        });
     }
 
-    private static ApiResponse problemResponse(String description) {
-        Schema<?> reference = new Schema<>().$ref("#/components/schemas/" + PROBLEM_SCHEMA);
-        return new ApiResponse()
-                .description(description)
-                .content(new Content().addMediaType(PROBLEM_MEDIA_TYPE, new MediaType().schema(reference)));
+    private static void sortResponses(Operation operation) {
+        if (operation.getResponses() == null) {
+            return;
+        }
+        Map<String, ApiResponse> sorted = new LinkedHashMap<>();
+        operation.getResponses().entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.naturalOrder()))
+                .forEach(entry -> sorted.put(entry.getKey(), entry.getValue()));
+        ApiResponses responses = new ApiResponses();
+        responses.putAll(sorted);
+        operation.setResponses(responses);
+    }
+
+    /** Public endpoints opt out of the global bearer requirement with an empty {@code @SecurityRequirements}. */
+    private static boolean isPublic(HandlerMethod handlerMethod) {
+        SecurityRequirements requirements = handlerMethod.getMethodAnnotation(SecurityRequirements.class);
+        return requirements != null && requirements.value().length == 0;
+    }
+
+    private static boolean takesInput(HandlerMethod handlerMethod) {
+        return Arrays.stream(handlerMethod.getMethodParameters())
+                .map(MethodParameter::getParameterType)
+                .anyMatch(type -> !type.equals(AuthenticatedUser.class));
     }
 
     private static Schema<?> problemSchema() {
         ObjectSchema fieldError = new ObjectSchema();
-        fieldError.addProperty("field", new StringSchema().example("amount"));
-        fieldError.addProperty("message", new StringSchema().example("deve ser maior que zero"));
+        fieldError.addProperty("field", new StringSchema().description("Campo com problema"));
+        fieldError.addProperty("message", new StringSchema().description("O que está errado"));
 
         ObjectSchema problem = new ObjectSchema();
         problem.description("Problem Details (RFC 9457). O catálogo de `type` está em docs/convencoes.md.");
-        problem.addProperty("type", new StringSchema().example("validation-error"));
-        problem.addProperty("title", new StringSchema().example("Dados inválidos"));
-        problem.addProperty("status", new IntegerSchema().example(400));
-        problem.addProperty("detail", new StringSchema());
-        problem.addProperty("instance", new StringSchema().example("/api/v1/deposits"));
-        problem.addProperty("errors", new ArraySchema().items(fieldError));
+        problem.addProperty("type", new StringSchema().description("Identificador estável do erro"));
+        problem.addProperty("title", new StringSchema().description("Resumo legível do erro, em português"));
+        problem.addProperty("status", new IntegerSchema().description("Status HTTP"));
+        problem.addProperty("detail", new StringSchema().description("Detalhe opcional"));
+        problem.addProperty("instance", new StringSchema().description("Caminho da requisição"));
+        problem.addProperty("errors", new ArraySchema()
+                .description("Só em `validation-error`: um item por campo inválido")
+                .items(fieldError));
         problem.setRequired(List.of("type", "title", "status"));
         return problem;
+    }
+
+    record ProblemDoc(int status, String type, String title, String description) {
+
+        static ProblemDoc from(ApiProblem annotation) {
+            return new ProblemDoc(annotation.status(), annotation.type(), annotation.title(), annotation.description());
+        }
+
+        Map<String, Object> example() {
+            Map<String, Object> example = new LinkedHashMap<>();
+            example.put("type", type);
+            example.put("title", title);
+            example.put("status", status);
+            if (status == 400 && type.equals(VALIDATION_ERROR.type())) {
+                Map<String, String> fieldError = new LinkedHashMap<>();
+                fieldError.put("field", "email");
+                fieldError.put("message", "deve ser um endereço de e-mail");
+                example.put("errors", List.of(fieldError));
+            }
+            return example;
+        }
     }
 }

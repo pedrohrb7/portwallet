@@ -32,6 +32,7 @@ Regras que valem para todas as features. Uma spec só repete uma regra daqui par
 | `daily-limit-exceeded` | 422 | Transferência passaria do limite diário |
 | `self-transfer` | 422 | Destino igual à origem |
 | `recipient-unavailable` | 422 | Destinatário deixou de estar ativo entre a busca e a transferência |
+| `wrong-password` | 422 | Senha da ativação diferente da do cadastro pendente; o link continua válido |
 | `internal-error` | 500 | Erro inesperado; detalhes só no log |
 
 Fases seguintes acrescentam tipos (`idempotency-*`, `totp-*`, `rate-limited`, `fraud-check-unavailable`) nas próprias specs e neste catálogo.
@@ -61,6 +62,7 @@ Fases seguintes acrescentam tipos (`idempotency-*`, `totp-*`, `rate-limited`, `f
 - Dentro de cada pacote: `api` (controllers e DTOs), `domain` (entidades e regras), `application` (casos de uso, transações) e `infra` (repositórios e integrações), criados conforme a necessidade.
 - Controllers não acessam repositórios; regras de negócio não ficam em controllers. Verificado por ArchUnit a partir da Fase 2.
 - DTOs são `record`s com Bean Validation. Entidades JPA nunca saem da camada `application`.
+- Documentação OpenAPI de cada endpoint: `@Operation` com resumo, `@ApiResponse` para o sucesso, `@Schema(example = ...)` nos campos dos DTOs, `@SecurityRequirements` vazio nos endpoints públicos e um `@ApiProblem` para cada erro de negócio que o endpoint pode devolver. Os erros genéricos (400 de validação, 401 e 500) são adicionados sozinhos e não devem ser declarados.
 - `spring.jpa.open-in-view=false`; leituras por projeção em DTO.
 - Migrations Flyway em `db/migration`, nomeadas `V<N>__<descricao_em_snake_case>.sql`, nunca editadas depois de publicadas. SQL portátil entre H2 (`MODE=PostgreSQL`) e PostgreSQL.
 - Logs nunca contêm senha, token, segredo TOTP ou CPF completo.

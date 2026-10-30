@@ -8,11 +8,15 @@ docs/
 ├── convencoes.md       regras transversais (API, dinheiro, erros, código)
 ├── _templates/         modelos de spec e plano
 ├── adr/                decisões de arquitetura (imutáveis depois de aceitas)
+├── backlog/
+│   └── refactor/       refactors planejados (padrão da skill project-docs), com índice próprio
 └── features/
     └── <id>-<slug>/
         ├── spec.md     especificação técnica
         └── plan.md     plano de implementação
 ```
+
+Refactors planejados ficam em [`backlog/refactor/`](backlog/refactor/README.md), um arquivo datado por refactor, criado a partir do `TEMPLATE.md` da pasta.
 
 ## Fluxo de trabalho
 
@@ -49,7 +53,7 @@ A spec descreve uma feature e evolui com ela. O ADR registra uma decisão que va
 | 1 | Fundação | [spec](features/rnf-fundacao/spec.md) | [plano](features/rnf-fundacao/plan.md) | Concluída |
 | 2 | Base da aplicação (erros, segurança, shell do frontend) | [spec](features/rnf-base-aplicacao/spec.md) | [plano](features/rnf-base-aplicacao/plan.md) | Concluída |
 | 2 | Documentação da API (OpenAPI e Swagger UI) | [spec](features/rnf-documentacao-api/spec.md) | [plano](features/rnf-documentacao-api/plan.md) | Concluída |
-| 2 | RF-01 Cadastro e confirmação | [spec](features/rf-01-cadastro/spec.md) | [plano](features/rf-01-cadastro/plan.md) | Aprovada |
+| 2 | RF-01 Cadastro e confirmação | [spec](features/rf-01-cadastro/spec.md) | [plano](features/rf-01-cadastro/plan.md) | Concluída |
 | 2 | RF-02 Login e refresh | [spec](features/rf-02-login/spec.md) | [plano](features/rf-02-login/plan.md) | Aprovada |
 | 2 | RF-03 Logout | [spec](features/rf-03-logout/spec.md) | [plano](features/rf-03-logout/plan.md) | Aprovada |
 | 2 | Ledger e concorrência | [spec](features/rnf-ledger-concorrencia/spec.md) | [plano](features/rnf-ledger-concorrencia/plan.md) | Aprovada |

@@ -2,3 +2,10 @@ portwallet:
   security:
     jwt:
       secret: test-only-insecure-jwt-secret-0123456789abcdef
+  crypto:
+    encryption-key: CofGSDsX497EScRUIT4I7b9wYzLr8TpTa1OV+rerNT0=
+    blind-index-key: 21ONoO2JoA/oTp0Mws+VCh4rLMokzUTNQnUA07D+c8c=
+  mock:
+    inbox:
+      # Tests read the simulated e-mails from the inbox table.
+      enabled: true

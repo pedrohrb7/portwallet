@@ -8,6 +8,7 @@ import java.util.UUID;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,6 +49,9 @@ public class SecurityConfig implements WebMvcConfigurer {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole(Role.ADMIN.name())
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/confirm").permitAll()
+                        // Demo inbox: only exists where portwallet.mock.inbox.enabled is true; 404 elsewhere.
+                        .requestMatchers(HttpMethod.GET, "/mock/inbox").permitAll()
                         // API docs only exist in the dev and demo profiles; elsewhere these routes are 404.
                         .requestMatchers("/v3/api-docs", "/v3/api-docs/**", "/swagger-ui", "/swagger-ui/**",
                                 "/swagger-ui.html").permitAll()

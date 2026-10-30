@@ -46,7 +46,7 @@
 ### 6. CI
 
 - [x] `.github/workflows/ci.yml` com jobs `backend`, `frontend`, `e2e` e `docker`
-- **Validação:** pendente da primeira execução no GitHub
+- **Validação:** 4 jobs verdes no GitHub Actions
 
 ### 7. Documentação
 
@@ -59,4 +59,4 @@
 - [x] `npm run lint && npm run typecheck && npm test` verdes
 - [x] Cenário E2E verde em Chromium e Firefox
 - [x] Tela revisada em desktop e mobile
-- [ ] CI verde no GitHub
+- [x] CI verde no GitHub

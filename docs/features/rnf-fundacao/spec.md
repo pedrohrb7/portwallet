@@ -82,4 +82,4 @@ Registradas no [ADR 0002](../../adr/0002-fundacao-stack-e-estrutura.md).
 
 ## Questões em aberto
 
-- Pipeline ainda não executado no GitHub: falta configurar o repositório remoto.
+- Nenhuma. O pipeline rodou verde no GitHub Actions.

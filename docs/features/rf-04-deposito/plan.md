@@ -1,6 +1,6 @@
 # Plano: RF-04 Depósito simulado
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rnf-ledger-concorrencia](../rnf-ledger-concorrencia/plan.md), [rf-08-saldo](../rf-08-saldo/plan.md)
 

@@ -22,7 +22,10 @@ Regras que valem para todas as features. Uma spec só repete uma regra daqui par
 | `invalid-refresh-token` | 401 | Refresh token ausente, expirado ou revogado |
 | `forbidden` | 403 | Perfil sem permissão ou recurso de outro usuário |
 | `account-blocked` | 403 | Conta do usuário bloqueada tentando movimentar dinheiro |
-| `not-found` | 404 | Recurso inexistente |
+| `not-found` | 404 | Recurso ou rota inexistente |
+| `method-not-allowed` | 405 | Método HTTP não suportado pela rota |
+| `not-acceptable` | 406 | Formato de resposta pedido em `Accept` não suportado |
+| `unsupported-media-type` | 415 | `Content-Type` da requisição não suportado |
 | `recipient-not-found` | 404 | Busca de destinatário sem resultado (inexistente ou inativo, sem distinção) |
 | `concurrency-conflict` | 409 | Lock otimista falhou após as novas tentativas |
 | `insufficient-balance` | 422 | Saldo menor que o valor |
@@ -37,7 +40,8 @@ Fases seguintes acrescentam tipos (`idempotency-*`, `totp-*`, `rate-limited`, `f
 
 - Sempre `BigDecimal` com escala 2 e `RoundingMode.UNNECESSARY`: um valor com mais de duas casas é rejeitado, nunca arredondado.
 - No banco, `DECIMAL(19,2)`.
-- No JSON, **string** com duas casas (`"150.00"`), em requisições e respostas. Requisições também aceitam número, convertido sem perda. Strings evitam a perda de precisão do `number` do JavaScript.
+- No JSON, **string** com duas casas (`"150.00"`), em requisições e respostas. Requisições também aceitam número, convertido sem perda. Strings evitam a perda de precisão do `number` do JavaScript ([ADR 0004](adr/0004-dinheiro-como-string-no-json.md)).
+- DTOs de resposta usam o tipo `Money`; DTOs de requisição podem usar `BigDecimal` com `@Digits(integer = 17, fraction = 2)` para a validação apontar o campo.
 - No frontend, valores ficam como string até a formatação com `Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })`. Contas de dinheiro não são feitas no cliente.
 
 ## Datas e fuso

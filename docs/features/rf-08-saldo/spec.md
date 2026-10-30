@@ -1,6 +1,6 @@
 # Spec: RF-08 Saldo
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-08; Frontend (Dashboard)
 - **Depende de:** [rnf-ledger-concorrencia](../rnf-ledger-concorrencia/spec.md)

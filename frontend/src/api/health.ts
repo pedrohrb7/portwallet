@@ -1,10 +1,11 @@
+import axios from 'axios'
+
 export type HealthStatus = 'UP' | 'DOWN' | 'UNKNOWN'
 
 export async function fetchHealth(signal?: AbortSignal): Promise<HealthStatus> {
-  const response = await fetch('/actuator/health', { signal })
-  if (!response.ok && response.status !== 503) {
-    return 'UNKNOWN'
-  }
-  const body: { status?: string } = await response.json()
-  return body.status === 'UP' ? 'UP' : 'DOWN'
+  const response = await axios.get<{ status?: string }>('/actuator/health', {
+    signal,
+    validateStatus: (status) => status === 200 || status === 503,
+  })
+  return response.data.status === 'UP' ? 'UP' : 'DOWN'
 }

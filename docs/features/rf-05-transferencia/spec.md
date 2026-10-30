@@ -1,6 +1,6 @@
 # Spec: RF-05 Transferência
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-05; US-04; Concorrência e consistência
 - **Depende de:** [rf-17-busca-destinatario](../rf-17-busca-destinatario/spec.md), [rf-04-deposito](../rf-04-deposito/spec.md)

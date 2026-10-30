@@ -1,6 +1,6 @@
 # Spec: RF-17 Busca de destinatário
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-17; Segurança avançada (trade-off da busca)
 - **Depende de:** [rf-01-cadastro](../rf-01-cadastro/spec.md), [rnf-ledger-concorrencia](../rnf-ledger-concorrencia/spec.md)

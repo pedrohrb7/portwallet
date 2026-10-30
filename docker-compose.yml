@@ -2,7 +2,9 @@ services:
   api:
     build: ./backend
     environment:
-      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-default}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
+      # INSECURE demo default, so the project runs with no setup. Override JWT_SECRET anywhere else.
+      JWT_SECRET: ${JWT_SECRET:-demo-only-insecure-jwt-secret-0123456789abcdef}
     expose:
       - "8080"
     restart: unless-stopped

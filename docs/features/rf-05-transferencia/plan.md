@@ -1,6 +1,6 @@
 # Plano: RF-05 Transferência
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rf-17-busca-destinatario](../rf-17-busca-destinatario/plan.md), [rf-04-deposito](../rf-04-deposito/plan.md)
 

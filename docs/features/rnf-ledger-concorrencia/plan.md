@@ -1,6 +1,6 @@
 # Plano: Ledger e concorrência
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rf-01-cadastro](../rf-01-cadastro/plan.md)
 

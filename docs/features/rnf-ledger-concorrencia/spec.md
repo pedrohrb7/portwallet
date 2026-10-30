@@ -1,6 +1,6 @@
 # Spec: Ledger e concorrência
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** Concorrência e consistência; Modelo de dados (invariantes); RF-08
 - **Depende de:** [rf-01-cadastro](../rf-01-cadastro/spec.md) (tabela `accounts`)

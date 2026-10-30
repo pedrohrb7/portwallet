@@ -1,6 +1,6 @@
 # Plano: RF-01 Cadastro e confirmação
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rnf-base-aplicacao](../rnf-base-aplicacao/plan.md)
 

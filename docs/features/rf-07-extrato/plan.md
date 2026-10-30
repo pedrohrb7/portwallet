@@ -1,6 +1,6 @@
 # Plano: RF-07 Extrato
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rf-05-transferencia](../rf-05-transferencia/plan.md), [rf-04-deposito](../rf-04-deposito/plan.md)
 

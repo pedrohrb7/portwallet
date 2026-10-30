@@ -1,6 +1,6 @@
 # Spec: RF-07 Extrato
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-07; US-05; Performance (paginação por cursor)
 - **Depende de:** [rf-05-transferencia](../rf-05-transferencia/spec.md), [rf-04-deposito](../rf-04-deposito/spec.md)

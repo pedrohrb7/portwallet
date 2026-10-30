@@ -1,6 +1,6 @@
 # Plano: RF-06 Consulta de transferência
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rf-05-transferencia](../rf-05-transferencia/plan.md)
 

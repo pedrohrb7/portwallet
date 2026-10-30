@@ -1,0 +1,4 @@
+portwallet:
+  security:
+    jwt:
+      secret: test-only-insecure-jwt-secret-0123456789abcdef

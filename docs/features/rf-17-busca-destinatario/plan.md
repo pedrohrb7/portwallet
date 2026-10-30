@@ -1,6 +1,6 @@
 # Plano: RF-17 Busca de destinatário
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rf-01-cadastro](../rf-01-cadastro/plan.md), [rnf-ledger-concorrencia](../rnf-ledger-concorrencia/plan.md)
 

@@ -1,6 +1,6 @@
 # Spec: RF-03 Logout
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-03
 - **Depende de:** [rf-02-login](../rf-02-login/spec.md)

@@ -1,6 +1,6 @@
 # Spec: RF-06 Consulta de transferência
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-06; Segurança (checagem de propriedade)
 - **Depende de:** [rf-05-transferencia](../rf-05-transferencia/spec.md)

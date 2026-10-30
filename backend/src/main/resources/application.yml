@@ -36,6 +36,22 @@ management:
       probes:
         enabled: true
 
+portwallet:
+  security:
+    jwt:
+      secret: ${JWT_SECRET:}
+      access-token-ttl: PT15M
+
+# API docs exist only in the dev and demo profiles (see docs/features/rnf-documentacao-api).
+springdoc:
+  api-docs:
+    enabled: false
+    version: openapi_3_1
+  swagger-ui:
+    enabled: false
+    path: /swagger-ui
+  paths-to-match: /api/v1/**
+
 ---
 spring:
   config:
@@ -45,3 +61,25 @@ spring:
     console:
       enabled: true
       path: /h2-console
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev | e2e
+portwallet:
+  security:
+    jwt:
+      # INSECURE: development-only secret. Real environments must set JWT_SECRET.
+      secret: ${JWT_SECRET:dev-only-insecure-jwt-secret-0123456789abcdef}
+
+---
+spring:
+  config:
+    activate:
+      on-profile: dev | demo
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true

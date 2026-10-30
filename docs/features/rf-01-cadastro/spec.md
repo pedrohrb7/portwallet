@@ -1,6 +1,6 @@
 # Spec: RF-01 Cadastro e confirmação
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-01; Segurança avançada (anti-enumeração); US-01
 - **Depende de:** [rnf-base-aplicacao](../rnf-base-aplicacao/spec.md)

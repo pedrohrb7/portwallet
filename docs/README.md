@@ -47,17 +47,18 @@ A spec descreve uma feature e evolui com ela. O ADR registra uma decisão que va
 | Fase | Feature | Spec | Plano | Status |
 | --- | --- | --- | --- | --- |
 | 1 | Fundação | [spec](features/rnf-fundacao/spec.md) | [plano](features/rnf-fundacao/plan.md) | Concluída |
-| 2 | Base da aplicação (erros, segurança, shell do frontend) | [spec](features/rnf-base-aplicacao/spec.md) | [plano](features/rnf-base-aplicacao/plan.md) | Rascunho |
-| 2 | RF-01 Cadastro e confirmação | [spec](features/rf-01-cadastro/spec.md) | [plano](features/rf-01-cadastro/plan.md) | Rascunho |
-| 2 | RF-02 Login e refresh | [spec](features/rf-02-login/spec.md) | [plano](features/rf-02-login/plan.md) | Rascunho |
-| 2 | RF-03 Logout | [spec](features/rf-03-logout/spec.md) | [plano](features/rf-03-logout/plan.md) | Rascunho |
-| 2 | Ledger e concorrência | [spec](features/rnf-ledger-concorrencia/spec.md) | [plano](features/rnf-ledger-concorrencia/plan.md) | Rascunho |
-| 2 | RF-08 Saldo | [spec](features/rf-08-saldo/spec.md) | [plano](features/rf-08-saldo/plan.md) | Rascunho |
-| 2 | RF-04 Depósito simulado | [spec](features/rf-04-deposito/spec.md) | [plano](features/rf-04-deposito/plan.md) | Rascunho |
-| 2 | RF-17 Busca de destinatário | [spec](features/rf-17-busca-destinatario/spec.md) | [plano](features/rf-17-busca-destinatario/plan.md) | Rascunho |
-| 2 | RF-05 Transferência | [spec](features/rf-05-transferencia/spec.md) | [plano](features/rf-05-transferencia/plan.md) | Rascunho |
-| 2 | RF-06 Consulta de transferência | [spec](features/rf-06-consulta-transferencia/spec.md) | [plano](features/rf-06-consulta-transferencia/plan.md) | Rascunho |
-| 2 | RF-07 Extrato | [spec](features/rf-07-extrato/spec.md) | [plano](features/rf-07-extrato/plan.md) | Rascunho |
+| 2 | Base da aplicação (erros, segurança, shell do frontend) | [spec](features/rnf-base-aplicacao/spec.md) | [plano](features/rnf-base-aplicacao/plan.md) | Concluída |
+| 2 | Documentação da API (OpenAPI e Swagger UI) | [spec](features/rnf-documentacao-api/spec.md) | [plano](features/rnf-documentacao-api/plan.md) | Concluída |
+| 2 | RF-01 Cadastro e confirmação | [spec](features/rf-01-cadastro/spec.md) | [plano](features/rf-01-cadastro/plan.md) | Aprovada |
+| 2 | RF-02 Login e refresh | [spec](features/rf-02-login/spec.md) | [plano](features/rf-02-login/plan.md) | Aprovada |
+| 2 | RF-03 Logout | [spec](features/rf-03-logout/spec.md) | [plano](features/rf-03-logout/plan.md) | Aprovada |
+| 2 | Ledger e concorrência | [spec](features/rnf-ledger-concorrencia/spec.md) | [plano](features/rnf-ledger-concorrencia/plan.md) | Aprovada |
+| 2 | RF-08 Saldo | [spec](features/rf-08-saldo/spec.md) | [plano](features/rf-08-saldo/plan.md) | Aprovada |
+| 2 | RF-04 Depósito simulado | [spec](features/rf-04-deposito/spec.md) | [plano](features/rf-04-deposito/plan.md) | Aprovada |
+| 2 | RF-17 Busca de destinatário | [spec](features/rf-17-busca-destinatario/spec.md) | [plano](features/rf-17-busca-destinatario/plan.md) | Aprovada |
+| 2 | RF-05 Transferência | [spec](features/rf-05-transferencia/spec.md) | [plano](features/rf-05-transferencia/plan.md) | Aprovada |
+| 2 | RF-06 Consulta de transferência | [spec](features/rf-06-consulta-transferencia/spec.md) | [plano](features/rf-06-consulta-transferencia/plan.md) | Aprovada |
+| 2 | RF-07 Extrato | [spec](features/rf-07-extrato/spec.md) | [plano](features/rf-07-extrato/plan.md) | Aprovada |
 
 A ordem da tabela é a ordem de implementação da Fase 2: cada feature depende apenas das que estão acima dela.
 
@@ -68,3 +69,4 @@ A ordem da tabela é a ordem de implementação da Fase 2: cada feature depende 
 | [0001](adr/0001-registrar-decisoes-de-arquitetura.md) | Registrar decisões de arquitetura |
 | [0002](adr/0002-fundacao-stack-e-estrutura.md) | Fundação: stack, versões e estrutura do repositório |
 | [0003](adr/0003-specs-e-planos-por-feature.md) | Specs e planos por feature |
+| [0004](adr/0004-dinheiro-como-string-no-json.md) | Dinheiro como string no JSON |

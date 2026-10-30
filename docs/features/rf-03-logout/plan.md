@@ -1,6 +1,6 @@
 # Plano: RF-03 Logout
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Spec:** [spec.md](spec.md)
 - **Pré-requisitos:** [rf-02-login](../rf-02-login/plan.md)
 

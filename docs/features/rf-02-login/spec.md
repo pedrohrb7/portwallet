@@ -1,6 +1,6 @@
 # Spec: RF-02 Login e refresh
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-02; Segurança; US-02
 - **Depende de:** [rf-01-cadastro](../rf-01-cadastro/spec.md)

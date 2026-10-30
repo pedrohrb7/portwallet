@@ -11,7 +11,7 @@ O escopo completo está no [PRD](PRD.md). Specs técnicas, planos de implementa�
 | Fase | Entrega | Status |
 | --- | --- | --- |
 | 1. Fundação | Monorepo, Maven, Vite, Flyway, Docker Compose, CI, health e E2E trivial | Concluída |
-| 2. Núcleo da carteira | Cadastro, login, depósito, transferência, extrato, ledger | Pendente |
+| 2. Núcleo da carteira | Cadastro, login, depósito, transferência, extrato, ledger | Em andamento ([progresso](docs/README.md#features)) |
 | 3. Idempotência | `@Idempotent`, replay, limpeza | Pendente |
 | 4. Resiliência | Circuit breaker, bulkhead, outbox, painel admin | Pendente |
 | 5. Rate limit e segurança base | Bucket4j, refresh rotativo, CSRF, auditoria | Pendente |
@@ -27,6 +27,8 @@ docker compose up --build
 ```
 
 Acesse <http://localhost:3000>. A porta pode ser trocada com `WEB_PORT=8000 docker compose up --build`.
+
+O compose sobe a API no perfil `demo` e passa a ela um segredo de JWT de demonstração. Fora de uma demo local, defina `JWT_SECRET` com no mínimo 32 bytes. Sem um segredo, a API só sobe nos perfis `dev` e `e2e`, que têm um segredo de desenvolvimento próprio.
 
 ## Versões fixadas
 
@@ -99,6 +101,15 @@ portwallet/
 ├── .github/workflows/  pipeline de CI
 └── docker-compose.yml
 ```
+
+## Documentação da API
+
+O Swagger UI fica disponível nos perfis `dev` e `demo`, e não existe nos demais:
+
+- Com Docker: <http://localhost:3000/swagger-ui>
+- Com o backend local no perfil `dev`: <http://localhost:8080/swagger-ui>
+
+O documento OpenAPI 3.1 fica em `/v3/api-docs`. Para chamar endpoints protegidos, faça login e cole o `accessToken` em "Authorize".
 
 ## Endpoints
 

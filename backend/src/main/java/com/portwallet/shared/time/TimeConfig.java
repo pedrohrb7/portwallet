@@ -1,0 +1,18 @@
+package com.portwallet.shared.time;
+
+import java.time.Clock;
+import java.time.ZoneId;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration(proxyBeanMethods = false)
+public class TimeConfig {
+
+    /** Time zone used by business rules that depend on "a day", such as the daily limit and statement filters. */
+    public static final ZoneId BUSINESS_ZONE = ZoneId.of("America/Sao_Paulo");
+
+    @Bean
+    Clock clock() {
+        return Clock.systemUTC();
+    }
+}

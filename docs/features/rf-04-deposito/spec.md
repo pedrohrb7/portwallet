@@ -1,6 +1,6 @@
 # Spec: RF-04 Depósito simulado
 
-- **Status:** Rascunho
+- **Status:** Aprovada
 - **Fase:** 2
 - **PRD:** RF-04; US-03
 - **Depende de:** [rnf-ledger-concorrencia](../rnf-ledger-concorrencia/spec.md), [rf-08-saldo](../rf-08-saldo/spec.md)

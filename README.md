@@ -4,7 +4,7 @@ Carteira digital fullstack de portfólio: usuários abrem conta, depositam, tran
 
 > Ambiente de demonstração, sem dinheiro real.
 
-O escopo completo está no [PRD](PRD.md). As decisões de arquitetura ficam em [`docs/adr/`](docs/adr/).
+O escopo completo está no [PRD](PRD.md). Specs técnicas, planos de implementação, convenções e decisões de arquitetura ficam em [`docs/`](docs/README.md).
 
 ## Status
 
@@ -95,7 +95,7 @@ portwallet/
 ├── backend/            Spring Boot (Maven), pacotes por funcionalidade
 ├── frontend/           React + Vite + Tailwind
 │   └── e2e/            testes Playwright
-├── docs/adr/           decisões de arquitetura
+├── docs/               specs, planos, convenções e ADRs
 ├── .github/workflows/  pipeline de CI
 └── docker-compose.yml
 ```

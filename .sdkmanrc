@@ -1,0 +1,4 @@
+# Run `sdk env install` in the repository root to install these versions,
+# and `sdk env` to activate them in the current shell.
+java=21.0.13.0+9-tem
+maven=3.9.16

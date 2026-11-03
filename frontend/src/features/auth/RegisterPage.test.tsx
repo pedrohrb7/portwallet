@@ -32,7 +32,6 @@ describe('RegisterPage', () => {
     await user.type(screen.getByLabelText('Nome completo'), 'Ana Souza')
     await user.type(screen.getByLabelText('E-mail'), 'Ana@Demo.com')
     await user.type(screen.getByLabelText('CPF'), '52998224725')
-    await user.type(screen.getByLabelText('Senha'), 's3nh@forte')
     return user
   }
 
@@ -51,9 +50,13 @@ describe('RegisterPage', () => {
         name: 'Ana Souza',
         email: 'ana@demo.com',
         document: '529.982.247-25',
-        password: 's3nh@forte',
       },
     ])
+  })
+
+  it('does not ask for a password, which is chosen on activation', () => {
+    renderRoutes([{ path: '/register', element: <RegisterPage /> }], '/register')
+    expect(screen.queryByLabelText(/senha/i)).not.toBeInTheDocument()
   })
 
   it('validates fields before sending', async () => {

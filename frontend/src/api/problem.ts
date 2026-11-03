@@ -20,7 +20,6 @@ const messages: Record<string, string> = {
   'invalid-token': 'Link inválido ou expirado.',
   unauthorized: 'Sua sessão expirou. Entre novamente.',
   'invalid-credentials': 'E-mail ou senha inválidos.',
-  'wrong-password': 'Senha incorreta. Use a senha escolhida no cadastro mais recente.',
   'invalid-refresh-token': 'Sua sessão expirou. Entre novamente.',
   forbidden: 'Você não tem permissão para acessar isto.',
   'account-blocked': 'Sua conta está bloqueada para movimentações.',

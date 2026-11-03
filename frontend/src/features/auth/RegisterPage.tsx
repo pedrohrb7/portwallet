@@ -17,7 +17,7 @@ export function RegisterPage() {
   const form = useForm<RegisterInput, unknown, RegisterData>({
     resolver: zodResolver(registerSchema),
     mode: 'onTouched',
-    defaultValues: { name: '', email: '', document: '', password: '' },
+    defaultValues: { name: '', email: '', document: '' },
   })
   const { errors } = form.formState
 
@@ -61,7 +61,8 @@ export function RegisterPage() {
       <div className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Criar conta</h1>
         <p className="text-sm text-slate-600">
-          Use dados fictícios: este é um ambiente de demonstração.
+          Use dados fictícios: este é um ambiente de demonstração. Você cria a senha ao ativar a
+          conta pelo link enviado por e-mail.
         </p>
       </div>
       <form
@@ -94,14 +95,6 @@ export function RegisterPage() {
             event.target.value = formatCpf(event.target.value)
             return documentField.onChange(event)
           }}
-        />
-        <TextField
-          label="Senha"
-          type="password"
-          autoComplete="new-password"
-          hint="Mínimo de 8 caracteres."
-          error={errors.password?.message}
-          {...form.register('password')}
         />
         {problem && !problem.errors?.length && <Alert tone="error">{messageFor(problem)}</Alert>}
         <Button type="submit" loading={mutation.isPending} loadingLabel="Enviando...">

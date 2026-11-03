@@ -46,39 +46,42 @@ public class OpenApiConfig {
     static final String PROBLEM_SCHEMA = "Problem";
     static final String PROBLEM_MEDIA_TYPE = "application/problem+json";
 
-    private static final ProblemDoc VALIDATION_ERROR = new ProblemDoc(400, "validation-error", "Dados inválidos",
-            "Campos ou parâmetros inválidos; `errors` lista cada campo");
-    private static final ProblemDoc UNAUTHORIZED = new ProblemDoc(401, "unauthorized", "Autenticação necessária",
-            "Access token ausente, inválido ou expirado");
-    private static final ProblemDoc INTERNAL_ERROR = new ProblemDoc(500, "internal-error", "Erro inesperado",
-            "Erro inesperado; os detalhes ficam só no log");
+    private static final ProblemDoc VALIDATION_ERROR = new ProblemDoc(
+            400, "validation-error", "Dados inválidos", "Campos ou parâmetros inválidos; `errors` lista cada campo");
+    private static final ProblemDoc UNAUTHORIZED = new ProblemDoc(
+            401, "unauthorized", "Autenticação necessária", "Access token ausente, inválido ou expirado");
+    private static final ProblemDoc INTERNAL_ERROR =
+            new ProblemDoc(500, "internal-error", "Erro inesperado", "Erro inesperado; os detalhes ficam só no log");
 
     static {
         // Money is serialized as a string with two decimal places (ADR 0004), not as an object.
-        SpringDocUtils.getConfig().replaceWithSchema(Money.class, new StringSchema()
-                .pattern("^-?\\d+\\.\\d{2}$")
-                .example("150.00")
-                .description("Valor em BRL com duas casas decimais"));
+        SpringDocUtils.getConfig()
+                .replaceWithSchema(
+                        Money.class,
+                        new StringSchema()
+                                .pattern("^-?\\d+\\.\\d{2}$")
+                                .example("150.00")
+                                .description("Valor em BRL com duas casas decimais"));
     }
 
     @Bean
     OpenAPI portWalletOpenApi() {
         return new OpenAPI()
-                .info(new Info()
-                        .title("PortWallet API")
-                        .version("v1")
-                        .description("""
-                                Carteira digital de portfólio. Ambiente de demonstração, sem dinheiro real.
+                .info(new Info().title("PortWallet API").version("v1").description("""
+                    Carteira digital de portfólio. Ambiente de demonstração, sem dinheiro real.
 
-                                Erros seguem Problem Details (RFC 9457) com um `type` estável. Valores monetários \
-                                são strings com duas casas decimais. Para chamar endpoints protegidos, faça login e \
-                                use o `accessToken` em "Authorize"."""))
+                    Erros seguem Problem Details (RFC 9457) com um `type` estável. Valores monetários \
+                    são strings com duas casas decimais. Para chamar endpoints protegidos, faça login e \
+                    use o `accessToken` em "Authorize".\
+                    """))
                 .servers(List.of(new Server().url("/")))
                 .components(new Components()
-                        .addSecuritySchemes(BEARER_AUTH, new SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP)
-                                .scheme("bearer")
-                                .bearerFormat("JWT")))
+                        .addSecuritySchemes(
+                                BEARER_AUTH,
+                                new SecurityScheme()
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_AUTH));
     }
 
@@ -126,20 +129,23 @@ public class OpenApiConfig {
         if (operation.getResponses() == null) {
             operation.setResponses(new ApiResponses());
         }
-        Map<Integer, List<ProblemDoc>> byStatus = problems.stream()
-                .collect(Collectors.groupingBy(ProblemDoc::status, TreeMap::new, Collectors.toList()));
+        Map<Integer, List<ProblemDoc>> byStatus =
+                problems.stream().collect(Collectors.groupingBy(ProblemDoc::status, TreeMap::new, Collectors.toList()));
         byStatus.forEach((status, docs) -> {
             MediaType mediaType = new MediaType().schema(new Schema<>().$ref("#/components/schemas/" + PROBLEM_SCHEMA));
-            docs.forEach(doc -> mediaType.addExamples(doc.type(), new Example()
-                    .summary(doc.type())
-                    .value(doc.example())));
+            docs.forEach(doc -> mediaType.addExamples(
+                    doc.type(), new Example().summary(doc.type()).value(doc.example())));
             // Markdown list, rendered by the Swagger UI: one line per problem type.
             String description = docs.stream()
                     .map(doc -> "- `" + doc.type() + "`: " + doc.description())
                     .collect(Collectors.joining("\n"));
-            operation.getResponses().put(String.valueOf(status), new ApiResponse()
-                    .description(description)
-                    .content(new Content().addMediaType(PROBLEM_MEDIA_TYPE, mediaType)));
+            operation
+                    .getResponses()
+                    .put(
+                            String.valueOf(status),
+                            new ApiResponse()
+                                    .description(description)
+                                    .content(new Content().addMediaType(PROBLEM_MEDIA_TYPE, mediaType)));
         });
     }
 
@@ -180,9 +186,12 @@ public class OpenApiConfig {
         problem.addProperty("status", new IntegerSchema().description("Status HTTP"));
         problem.addProperty("detail", new StringSchema().description("Detalhe opcional"));
         problem.addProperty("instance", new StringSchema().description("Caminho da requisição"));
-        problem.addProperty("errors", new ArraySchema()
-                .description("Só em `validation-error`: um item por campo inválido")
-                .items(fieldError));
+        // items() first: description() returns the raw Schema type, and calling items() on it is an unchecked call.
+        problem.addProperty(
+                "errors",
+                new ArraySchema()
+                        .items(fieldError)
+                        .description("Só em `validation-error`: um item por campo inválido"));
         problem.setRequired(List.of("type", "title", "status"));
         return problem;
     }

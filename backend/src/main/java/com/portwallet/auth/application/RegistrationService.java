@@ -17,7 +17,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -34,19 +33,16 @@ public class RegistrationService {
 
     private final UserRepository users;
     private final UserTokenRepository tokens;
-    private final PasswordEncoder passwordEncoder;
     private final BlindIndex blindIndex;
     private final NotificationGateway notifications;
     private final AuthEmails emails;
     private final TransactionTemplate transaction;
     private final Clock clock;
 
-    RegistrationService(UserRepository users, UserTokenRepository tokens, PasswordEncoder passwordEncoder,
-            BlindIndex blindIndex, NotificationGateway notifications, AuthEmails emails,
-            TransactionTemplate transaction, Clock clock) {
+    RegistrationService(UserRepository users, UserTokenRepository tokens, BlindIndex blindIndex,
+            NotificationGateway notifications, AuthEmails emails, TransactionTemplate transaction, Clock clock) {
         this.users = users;
         this.tokens = tokens;
-        this.passwordEncoder = passwordEncoder;
         this.blindIndex = blindIndex;
         this.notifications = notifications;
         this.emails = emails;
@@ -80,14 +76,13 @@ public class RegistrationService {
             return;
         }
 
-        String passwordHash = passwordEncoder.encode(command.password());
         User user;
         if (sameEmail.isPresent()) {
-            // Latest submission wins; activation also requires this password (see ConfirmationService).
+            // Latest submission wins; its new link shows these data before activation (see ConfirmationService).
             user = sameEmail.get();
-            user.replacePendingRegistration(command.name(), passwordHash, command.cpf(), documentHash);
+            user.replacePendingRegistration(command.name(), command.cpf(), documentHash);
         } else {
-            user = User.register(command.name(), command.email(), passwordHash, command.cpf(), documentHash, now);
+            user = User.register(command.name(), command.email(), command.cpf(), documentHash, now);
             users.save(user);
         }
         users.flush();

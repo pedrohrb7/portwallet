@@ -27,6 +27,8 @@ class AuthController {
 
     static final String REGISTER_MESSAGE =
             "Se os dados estiverem corretos, você receberá um e-mail para ativar a conta.";
+    private static final String TOKEN_DESCRIPTION = "Token do link de confirmação (o que vem depois de `#token=`)";
+    private static final String TOKEN_EXAMPLE = "q2VxN3V0c2Ftb3BsZS10b2tlbi1kZS0zMi1ieXRlcw";
 
     private final RegistrationService registration;
     private final ConfirmationService confirmation;
@@ -49,17 +51,30 @@ class AuthController {
         return new RegisterResponse(REGISTER_MESSAGE);
     }
 
+    @PostMapping("/confirm/summary")
+    @SecurityRequirements
+    @Operation(
+            summary = "Mostra os dados mascarados do cadastro a que o link de confirmação pertence",
+            description = "Não consome o link. Serve para o dono do e-mail conferir que os dados são os dele antes de "
+                    + "ativar: se alguém refez o cadastro com outros dados, o link mais recente mostra esses dados. "
+                    + "O token vai no corpo, e não na URL, para não aparecer em logs de acesso.")
+    @ApiResponse(responseCode = "200", description = "Dados do cadastro, mascarados")
+    @ApiProblem(status = 400, type = "invalid-token", title = "Link inválido ou expirado",
+            description = "Token desconhecido, expirado ou já usado")
+    SummaryResponse summary(@Valid @RequestBody SummaryRequest request) {
+        ConfirmationService.RegistrationSummary summary = confirmation.summary(request.token());
+        return new SummaryResponse(summary.maskedName(), summary.maskedDocument());
+    }
+
     @PostMapping("/confirm")
     @SecurityRequirements
     @Operation(
-            summary = "Ativa a conta com o link de confirmação e a senha do cadastro, e abre a carteira",
-            description = "A senha precisa ser a do cadastro mais recente desse e-mail. Assim, só quem controla o "
-                    + "e-mail e conhece a senha ativa a conta.")
+            summary = "Ativa a conta com o link de confirmação, definindo a senha, e abre a carteira",
+            description = "Só quem tem o link, e portanto acesso ao e-mail, escolhe a senha. Senha gravada, usuário "
+                    + "ativado, link consumido e conta aberta acontecem na mesma transação.")
     @ApiResponse(responseCode = "200", description = "Conta ativada")
     @ApiProblem(status = 400, type = "invalid-token", title = "Link inválido ou expirado",
             description = "Token desconhecido, expirado ou já usado")
-    @ApiProblem(status = 422, type = "wrong-password", title = "Senha incorreta",
-            description = "Senha diferente da do cadastro mais recente; o link continua válido")
     ConfirmResponse confirm(@Valid @RequestBody ConfirmRequest request) {
         confirmation.confirm(request.token(), request.password());
         return new ConfirmResponse("ACTIVE");
@@ -70,14 +85,33 @@ class AuthController {
             String message) {
     }
 
+    record SummaryRequest(
+            @Schema(description = TOKEN_DESCRIPTION, example = TOKEN_EXAMPLE)
+            @NotBlank @Size(max = 100)
+            String token) {
+
+        @Override
+        public String toString() {
+            return "SummaryRequest[token=***]";
+        }
+    }
+
+    record SummaryResponse(
+            @Schema(description = "Primeiro nome e inicial do último sobrenome", example = "Ana S****")
+            String maskedName,
+
+            @Schema(description = "Só os dígitos verificadores do CPF", example = "***.***.***-25")
+            String maskedDocument) {
+    }
+
     record ConfirmRequest(
-            @Schema(description = "Token do link de confirmação (o que vem depois de `#token=`)",
-                    example = "q2VxN3V0c2Ftb3BsZS10b2tlbi1kZS0zMi1ieXRlcw")
+            @Schema(description = TOKEN_DESCRIPTION, example = TOKEN_EXAMPLE)
             @NotBlank @Size(max = 100)
             String token,
 
-            @Schema(description = "Senha escolhida no cadastro mais recente", example = "s3nh@forte")
-            @NotNull @Size(max = 72) @MaxUtf8Bytes(72)
+            @Schema(description = "Senha da conta, escolhida agora", example = "s3nh@forte", minLength = 8,
+                    maxLength = 72)
+            @NotNull @Size(min = 8, max = 72) @MaxUtf8Bytes(72)
             String password) {
 
         @Override

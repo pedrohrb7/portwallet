@@ -18,14 +18,23 @@ class AuthEmails {
     Email confirmation(User user, String rawToken) {
         // The token goes in the URL fragment: browsers never send it to servers or in the Referer header.
         String link = appBaseUrl + "/confirm#token=" + rawToken;
+        // The data of this registration go along, so the owner notices if someone else replaced them.
         String body = """
                 Olá, %s!
 
-                Para ativar sua conta PortWallet, acesse o link abaixo. Ele vale por 24 horas e só pode ser usado uma vez.
+                Recebemos um cadastro na PortWallet com estes dados:
+
+                Nome: %s
+                CPF: %s
+
+                Se os dados estão corretos, acesse o link abaixo para criar sua senha e ativar a conta. Ele vale por 24 horas e só pode ser usado uma vez.
 
                 %s
 
-                Se você não criou esta conta, ignore este e-mail.""".formatted(user.firstName(), link);
+                Se os dados não são os seus, não use este link: faça o cadastro de novo, e só o link mais recente vai funcionar.
+
+                Se você não pediu este cadastro, ignore este e-mail.""".formatted(
+                user.firstName(), user.name(), user.cpf().masked(), link);
         return new Email(user.email(), "Ative sua conta PortWallet", body, link);
     }
 

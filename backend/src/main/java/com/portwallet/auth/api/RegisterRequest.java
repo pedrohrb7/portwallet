@@ -2,7 +2,6 @@ package com.portwallet.auth.api;
 
 import com.portwallet.auth.application.RegisterCommand;
 import com.portwallet.auth.domain.Cpf;
-import com.portwallet.shared.validation.MaxUtf8Bytes;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -21,11 +20,7 @@ public record RegisterRequest(
 
         @Schema(description = "CPF fictício, com ou sem máscara", example = "529.982.247-25")
         @NotNull @ValidCpf
-        String document,
-
-        @Schema(example = "s3nh@forte", minLength = 8, maxLength = 72)
-        @NotNull @Size(min = 8, max = 72) @MaxUtf8Bytes(72)
-        String password) {
+        String document) {
 
     /** Normalizes before validation runs: trimmed name, trimmed lower-case e-mail. */
     public RegisterRequest {
@@ -35,11 +30,11 @@ public record RegisterRequest(
     }
 
     RegisterCommand toCommand() {
-        return new RegisterCommand(name, email, Cpf.parse(document).orElseThrow(), password);
+        return new RegisterCommand(name, email, Cpf.parse(document).orElseThrow());
     }
 
     @Override
     public String toString() {
-        return "RegisterRequest[name=" + name + ", email=***, document=***, password=***]";
+        return "RegisterRequest[name=" + name + ", email=***, document=***]";
     }
 }

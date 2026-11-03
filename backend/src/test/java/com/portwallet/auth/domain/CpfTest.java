@@ -44,4 +44,9 @@ class CpfTest {
     void neverPrintsTheFullNumber() {
         assertThat(new Cpf("52998224725").toString()).isEqualTo("***.***.***-25");
     }
+
+    @Test
+    void maskedFormKeepsOnlyTheVerificationDigits() {
+        assertThat(new Cpf("52998224725").masked()).isEqualTo("***.***.***-25");
+    }
 }

@@ -10,6 +10,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -54,11 +55,10 @@ public class User {
     protected User() {
     }
 
-    private User(String name, String email, String passwordHash, Cpf cpf, String documentHash, Instant now) {
+    private User(String name, String email, Cpf cpf, String documentHash, Instant now) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.email = email;
-        this.passwordHash = passwordHash;
         this.document = cpf.digits();
         this.documentHash = documentHash;
         this.role = Role.USER;
@@ -66,30 +66,35 @@ public class User {
         this.createdAt = now;
     }
 
-    public static User register(String name, String email, String passwordHash, Cpf cpf, String documentHash,
-            Instant now) {
-        return new User(name, email, passwordHash, cpf, documentHash, now);
+    /** New pending user, still without a password: it is chosen on activation, by whoever holds the e-mail link. */
+    public static User register(String name, String email, Cpf cpf, String documentHash, Instant now) {
+        return new User(name, email, cpf, documentHash, now);
     }
 
     /**
-     * Replaces the data of a registration not yet confirmed with the latest submission. Without this, whoever registered
-     * an e-mail first (possibly an attacker) would choose the password of the account its owner later activates.
+     * Replaces the data of a registration not yet confirmed with the latest submission, so a typo can be fixed by
+     * registering again. Each submission issues a new link that shows the data it carries, so the owner of the e-mail
+     * notices if someone else replaced them.
      */
-    public void replacePendingRegistration(String name, String passwordHash, Cpf cpf, String documentHash) {
+    public void replacePendingRegistration(String name, Cpf cpf, String documentHash) {
         if (status != UserStatus.PENDING) {
             throw new IllegalStateException("Only pending registrations can be replaced");
         }
         this.name = name;
-        this.passwordHash = passwordHash;
         this.document = cpf.digits();
         this.documentHash = documentHash;
     }
 
-    public void activate() {
+    /** Sets the password chosen on activation and activates the user. */
+    public void activate(String passwordHash) {
         if (status != UserStatus.PENDING) {
             throw new IllegalStateException("Only pending users can be activated");
         }
-        status = UserStatus.ACTIVE;
+        if (passwordHash == null || passwordHash.isBlank()) {
+            throw new IllegalArgumentException("An active user needs a password");
+        }
+        this.passwordHash = passwordHash;
+        this.status = UserStatus.ACTIVE;
     }
 
     public UUID id() {
@@ -104,8 +109,9 @@ public class User {
         return email;
     }
 
-    public String passwordHash() {
-        return passwordHash;
+    /** BCrypt hash of the password; empty while the user is pending. */
+    public Optional<String> passwordHash() {
+        return Optional.ofNullable(passwordHash);
     }
 
     public Cpf cpf() {

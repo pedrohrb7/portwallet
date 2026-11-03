@@ -43,9 +43,14 @@ public record Cpf(String digits) {
         return remainder == 10 ? 0 : remainder;
     }
 
+    /** Only the two verification digits, as in {@code ***.***.***-25}. Safe to show and to log. */
+    public String masked() {
+        return "***.***.***-" + digits.substring(9);
+    }
+
     /** Never prints the full number. */
     @Override
     public String toString() {
-        return "***.***.***-" + digits.substring(9);
+        return masked();
     }
 }

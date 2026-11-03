@@ -80,8 +80,8 @@ abstract class OpenApiDocsContract {
                 .andExpect(jsonPath(examples400 + "['validation-error'].value.errors[0].field").exists())
                 .andExpect(jsonPath(examples400 + "['invalid-token'].value.type").value("invalid-token"))
                 .andExpect(jsonPath(examples400 + "['invalid-token'].value.title").value("Link inválido ou expirado"))
-                .andExpect(jsonPath(examples422 + "['wrong-password'].value.type").value("wrong-password"))
-                .andExpect(jsonPath(examples422 + "['wrong-password'].value.status").value(422))
+                .andExpect(jsonPath(examples422 + "['insufficient-balance'].value.type").value("insufficient-balance"))
+                .andExpect(jsonPath(examples422 + "['insufficient-balance'].value.status").value(422))
                 .andExpect(jsonPath(examples422 + "['validation-error']").doesNotExist())
                 .andExpect(jsonPath(responses + "['400'].description").value(containsString("`invalid-token`")))
                 .andExpect(jsonPath(responses + "['400'].content" + PROBLEM_JSON + ".schema.$ref")
@@ -163,7 +163,8 @@ abstract class OpenApiDocsContract {
         @SecurityRequirements
         @ApiProblem(status = 400, type = "invalid-token", title = "Link inválido ou expirado",
                 description = "Token desconhecido")
-        @ApiProblem(status = 422, type = "wrong-password", title = "Senha incorreta", description = "Senha errada")
+        @ApiProblem(status = 422, type = "insufficient-balance", title = "Saldo insuficiente",
+                description = "Saldo menor que o valor")
         SampleResponse publicSample(@RequestBody SampleRequest request) {
             return new SampleResponse(Money.of("1"));
         }

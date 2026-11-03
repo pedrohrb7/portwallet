@@ -9,3 +9,6 @@
 .env
 .env.*
 !.env.example
+# Vite mode files hold only public, non-secret flags (VITE_*) and must be versioned;
+# local overrides go in .env*.local, which stays ignored.
+!frontend/.env.development

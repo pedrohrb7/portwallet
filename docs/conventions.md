@@ -73,6 +73,7 @@ Later phases add types (`idempotency-*`, `totp-*`, `rate-limited`, `fraud-check-
 - Access token only in memory, never in `localStorage` or `sessionStorage`.
 - API errors mapped by the Problem Details `type` to messages in Portuguese.
 - Test selectors by ARIA role and `data-testid`. No `waitForTimeout` in E2E tests.
+- Build flags (`VITE_*`) are public, since they end up in the bundle. The dev and E2E values live in `frontend/.env.development`, which is versioned (CI and fresh clones depend on it). Never put secrets there; personal overrides go in `.env*.local`, which stays ignored.
 
 ## Language
 

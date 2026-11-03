@@ -118,6 +118,11 @@ class SecurityTest {
         mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
     }
 
+    @Test
+    void h2ConsoleIsClosedWhereItIsDisabled() throws Exception {
+        mockMvc.perform(get("/h2-console/")).andExpect(status().isUnauthorized());
+    }
+
     private String bearer(UUID userId, Role role) {
         return "Bearer " + jwtService.issue(userId, role).value();
     }

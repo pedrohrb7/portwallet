@@ -45,6 +45,16 @@ Compose already passes demo values for all of them. Outside a local demo, set yo
 
 To generate a key: `openssl rand -base64 32`.
 
+### Development mode (H2 console)
+
+The default Compose is the public demo: the API is reachable only through Nginx and the H2 console is off. To inspect the database, add the development override:
+
+```sh
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+```
+
+It runs the API in the `dev` profile and publishes port 8080 on the loopback only (`127.0.0.1`). The H2 console is at <http://localhost:8080/h2-console>: set the JDBC URL to `jdbc:h2:mem:portwallet` (the form suggests `jdbc:h2:~/test`), user `sa`, no password. The database lives in memory, so it starts empty on every API restart. To return to the demo, run `docker compose up -d` again.
+
 ## Pinned versions
 
 | Tool | Version |
@@ -121,8 +131,8 @@ portwallet/
 
 Swagger UI is available in the `dev` and `demo` profiles, and does not exist in the others:
 
-- With Docker: <http://localhost:3000/swagger-ui>
-- With the local backend in the `dev` profile: <http://localhost:8080/swagger-ui>
+- With Docker: <http://localhost:3000/swagger-ui>. Port 8080 is not published: in Compose the API is reached only through the Nginx edge (unless you use the [development mode](#development-mode-h2-console)).
+- With the backend running locally (`./mvnw spring-boot:run`) in the `dev` profile: <http://localhost:8080/swagger-ui>
 
 The OpenAPI 3.1 document is at `/v3/api-docs`. To call protected endpoints, sign in and paste the `accessToken` into "Authorize".
 

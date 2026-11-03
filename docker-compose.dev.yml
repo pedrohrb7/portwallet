@@ -1,0 +1,12 @@
+# Development override: opens the API directly and enables the H2 console.
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# Never use it for a public demo: the H2 console gives full access to the database.
+services:
+  api:
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      # Requests from the host reach the container through the Docker network, which H2 treats as remote.
+      SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
+    ports:
+      # Bound to the loopback only, so the console and the API are not reachable from the local network.
+      - "127.0.0.1:8080:8080"

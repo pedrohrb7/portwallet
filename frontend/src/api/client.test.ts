@@ -1,7 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { sessionStore, type AuthResponse } from '../features/auth/sessionStore'
+import { chooseLanguage } from '../i18n'
 import { mockAdapter } from '../test/axiosMock'
-import { api, authClient, refreshSession } from './client'
+import { api, authClient, refreshSession, rootClient } from './client'
 
 const user = { id: 'u-1', name: 'Ana Souza', email: 'ana@demo.com', role: 'USER' as const }
 
@@ -74,6 +75,22 @@ describe('api client', () => {
     await expect(api.post('/transfers')).rejects.toMatchObject({ response: { status: 422 } })
 
     expect(refreshCalls).toBe(0)
+  })
+
+  it('sends the language of the interface on every client', async () => {
+    const languages: unknown[] = []
+    for (const instance of [api, authClient, rootClient]) {
+      mockAdapter(instance, (config) => {
+        languages.push(config.headers['Accept-Language'])
+        return { status: 200, data: {} }
+      })
+    }
+
+    await Promise.all([api.get('/a'), authClient.post('/b'), rootClient.get('/c')])
+    await chooseLanguage('fr')
+    await api.get('/a')
+
+    expect(languages).toEqual(['pt-BR', 'pt-BR', 'pt-BR', 'fr'])
   })
 
   it('restores the session from the refresh cookie', async () => {

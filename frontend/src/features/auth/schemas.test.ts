@@ -13,6 +13,7 @@ function errorsFor(input: Record<string, string>) {
   return result.success ? {} : z.flattenError(result.error).fieldErrors
 }
 
+// Messages are translation keys; the components translate them (see RegisterPage and ConfirmPage tests).
 describe('registerSchema', () => {
   it('accepts valid data and normalizes the e-mail', () => {
     const result = registerSchema.parse({ ...valid, email: '  Ana@Demo.COM ' })
@@ -20,15 +21,17 @@ describe('registerSchema', () => {
   })
 
   it('rejects a short name', () => {
-    expect(errorsFor({ ...valid, name: ' A ' }).name).toEqual(['Informe o nome completo'])
+    expect(errorsFor({ ...valid, name: ' A ' }).name).toEqual(['validation.nameRequired'])
   })
 
   it('rejects an invalid e-mail', () => {
-    expect(errorsFor({ ...valid, email: 'ana@' }).email).toEqual(['E-mail inválido'])
+    expect(errorsFor({ ...valid, email: 'ana@' }).email).toEqual(['validation.emailInvalid'])
   })
 
   it('rejects a CPF with wrong verification digits', () => {
-    expect(errorsFor({ ...valid, document: '529.982.247-24' }).document).toEqual(['CPF inválido'])
+    expect(errorsFor({ ...valid, document: '529.982.247-24' }).document).toEqual([
+      'validation.cpfInvalid',
+    ])
   })
 
   it('ignores a password, which is no longer part of the registration', () => {
@@ -52,26 +55,26 @@ describe('activationSchema', () => {
 
   it('rejects a short password', () => {
     expect(activationErrors({ password: 'short', passwordConfirmation: 'short' }).password).toEqual(
-      ['Use pelo menos 8 caracteres'],
+      ['validation.passwordTooShort'],
     )
   })
 
   it('rejects a password over 72 bytes even with fewer characters', () => {
     const long = 'ç'.repeat(40)
     expect(activationErrors({ password: long, passwordConfirmation: long }).password).toEqual([
-      'Senha longa demais',
+      'validation.passwordTooManyBytes',
     ])
   })
 
   it('rejects a confirmation that differs from the password', () => {
     expect(
       activationErrors({ password, passwordConfirmation: 's3nh@fort' }).passwordConfirmation,
-    ).toEqual(['As senhas não são iguais'])
+    ).toEqual(['validation.passwordMismatch'])
   })
 
   it('asks to repeat the password when the confirmation is empty', () => {
     expect(activationErrors({ password, passwordConfirmation: '' }).passwordConfirmation).toContain(
-      'Repita a senha',
+      'validation.passwordConfirmationRequired',
     )
   })
 })

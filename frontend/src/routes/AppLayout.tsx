@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet } from 'react-router'
 import { useSession } from '../features/auth/sessionStore'
 import { navItems } from './navigation'
 
 export function AppLayout() {
+  const { t } = useTranslation()
   const session = useSession()
 
   return (
@@ -13,7 +15,7 @@ export function AppLayout() {
             PortWallet
           </Link>
           {navItems.length > 0 && (
-            <nav aria-label="Principal" className="order-last w-full sm:order-none sm:w-auto">
+            <nav aria-label={t('nav.main')} className="order-last w-full sm:order-none sm:w-auto">
               <ul className="flex gap-4 text-sm">
                 {navItems.map((item) => (
                   <li key={item.to}>
@@ -26,7 +28,7 @@ export function AppLayout() {
                           : 'text-slate-600 hover:text-slate-900'
                       }
                     >
-                      {item.label}
+                      {t(item.label)}
                     </NavLink>
                   </li>
                 ))}

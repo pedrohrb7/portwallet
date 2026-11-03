@@ -13,10 +13,12 @@ import com.portwallet.shared.crypto.BlindIndex;
 import com.portwallet.support.TestData;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -238,6 +240,80 @@ class RegistrationTest {
     }
 
     @Test
+    void registrationWithoutAcceptLanguageIsSavedInBrazilianPortuguese() throws Exception {
+        String email = TestData.uniqueEmail();
+        register("Ana Souza", email, TestData.validCpf()).andExpect(status().isAccepted());
+
+        assertThat(userColumn(email, "language")).isEqualTo("PT_BR");
+    }
+
+    @Test
+    void messageAndConfirmationEmailFollowTheLanguageOfTheRequest() throws Exception {
+        String email = TestData.uniqueEmail();
+        String cpf = TestData.validCpf();
+        String body = register("Ana Souza", email, cpf, "en-US")
+                .andExpect(status().isAccepted())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).isEqualTo(
+                "{\"message\":\"If the details are correct, you will receive an e-mail to activate your account.\"}");
+        assertThat(userColumn(email, "language")).isEqualTo("EN");
+        assertThat(inbox.findByRecipient(email)).singleElement().satisfies(message -> {
+            assertThat(message.subject()).isEqualTo("Activate your PortWallet account");
+            assertThat(message.body())
+                    .startsWith("Hello, Ana!")
+                    .contains("Name: Ana Souza")
+                    .contains("CPF: ***.***.***-" + cpf.substring(9))
+                    .contains(message.link());
+        });
+    }
+
+    @Test
+    void registrationAttemptWarningIsWrittenInTheLanguageOfTheOwner() throws Exception {
+        String email = TestData.uniqueEmail();
+        register("Ana Souza", email, TestData.validCpf(), "fr").andExpect(status().isAccepted());
+        confirm(latestToken(email)).andExpect(status().isOk());
+
+        // Someone registers the same e-mail in another language: the answer is in theirs, the warning in the owner's.
+        String body = register("Intruso", email, TestData.validCpf(), "es")
+                .andExpect(status().isAccepted())
+                .andReturn().getResponse().getContentAsString();
+
+        assertThat(body).contains("Si los datos son correctos");
+        InboxMessage warning = inbox.findByRecipient(email).getFirst();
+        assertThat(warning.subject()).isEqualTo("Tentative d’inscription avec vos informations");
+        assertThat(warning.body()).startsWith("Bonjour Ana,").contains(warning.link());
+    }
+
+    @Test
+    void newPendingRegistrationReplacesTheLanguage() throws Exception {
+        String email = TestData.uniqueEmail();
+        register("Ana Souza", email, TestData.validCpf(), "es").andExpect(status().isAccepted());
+        assertThat(inbox.findByRecipient(email).getFirst().subject()).isEqualTo("Activa tu cuenta PortWallet");
+
+        register("Ana Souza", email, TestData.validCpf(), "pt-BR").andExpect(status().isAccepted());
+
+        assertThat(userColumn(email, "language")).isEqualTo("PT_BR");
+        assertThat(inbox.findByRecipient(email).getFirst().subject()).isEqualTo("Ative sua conta PortWallet");
+    }
+
+    @Test
+    void usersWithoutALanguageGetBrazilianPortuguese() {
+        // Rows that existed before the language column, inserted without it.
+        String email = TestData.uniqueEmail();
+        jdbc.sql("""
+                        INSERT INTO users (id, name, email, document_enc, document_hash, role, status, created_at)
+                        VALUES (:id, 'Ana Souza', :email, 'x', :hash, 'USER', 'PENDING', CURRENT_TIMESTAMP)
+                        """)
+                .param("id", UUID.randomUUID())
+                .param("email", email)
+                .param("hash", UUID.randomUUID().toString())
+                .update();
+
+        assertThat(userColumn(email, "language")).isEqualTo("PT_BR");
+    }
+
+    @Test
     void responseDoesNotLeakTheStatusOfTheEmail() throws Exception {
         String email = TestData.uniqueEmail();
         String cpf = TestData.validCpf();
@@ -251,10 +327,19 @@ class RegistrationTest {
     }
 
     private ResultActions register(String name, String email, String document) throws Exception {
+        return register(name, email, document, null);
+    }
+
+    private ResultActions register(String name, String email, String document, String acceptLanguage)
+            throws Exception {
         Map<String, String> request = Map.of("name", name, "email", email, "document", document);
-        return mockMvc.perform(post("/api/v1/auth/register")
+        var builder = post("/api/v1/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+                .content(objectMapper.writeValueAsString(request));
+        if (acceptLanguage != null) {
+            builder.header(HttpHeaders.ACCEPT_LANGUAGE, acceptLanguage);
+        }
+        return mockMvc.perform(builder);
     }
 
     private String registerBody(String name, String email, String document) throws Exception {

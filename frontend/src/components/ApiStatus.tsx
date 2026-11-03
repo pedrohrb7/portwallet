@@ -1,14 +1,8 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { fetchHealth, type HealthStatus } from '../api/health'
 
 type State = HealthStatus | 'LOADING'
-
-const labels: Record<State, string> = {
-  LOADING: 'Verificando...',
-  UP: 'Online',
-  DOWN: 'Fora do ar',
-  UNKNOWN: 'Indisponível',
-}
 
 const dotColors: Record<State, string> = {
   LOADING: 'bg-slate-400',
@@ -18,6 +12,7 @@ const dotColors: Record<State, string> = {
 }
 
 export function ApiStatus() {
+  const { t } = useTranslation()
   const [status, setStatus] = useState<State>('LOADING')
 
   useEffect(() => {
@@ -37,9 +32,9 @@ export function ApiStatus() {
     <p className="flex items-center gap-2 text-sm text-slate-600" role="status" aria-live="polite">
       <span aria-hidden="true" className={`size-2.5 rounded-full ${dotColors[status]}`} />
       <span>
-        API:{' '}
+        {t('apiStatus.label')}{' '}
         <span data-testid="api-status" data-status={status}>
-          {labels[status]}
+          {t(`apiStatus.${status}`)}
         </span>
       </span>
     </p>

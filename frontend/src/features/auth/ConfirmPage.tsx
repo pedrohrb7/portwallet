@@ -2,16 +2,18 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { confirmationSummary, confirmEmail } from '../../api/auth'
-import { messageFor, toProblem, type Problem } from '../../api/problem'
+import { problemKey, toProblem, type Problem } from '../../api/problem'
 import { Alert } from '../../components/Alert'
 import { Button } from '../../components/Button'
 import { TextField } from '../../components/TextField'
+import { SERVER_ERROR, useFieldErrorText } from '../../i18n/fieldErrors'
 import { activationSchema, type ActivationData } from './schemas'
 
-/** Keeps "e-mail" from breaking at its hyphen. */
-const Email = () => <span className="whitespace-nowrap">e-mail</span>
+/** Keeps a term such as "e-mail" from breaking at its hyphen (`<nowrap>` in the catalogs). */
+const noWrap = <span className="whitespace-nowrap" />
 
 const linkClass = 'font-medium text-slate-900 underline underline-offset-4'
 
@@ -20,18 +22,21 @@ function readTokenFromUrl(): string | null {
 }
 
 function Heading() {
-  return <h1 className="text-2xl font-semibold tracking-tight">Ativação da conta</h1>
+  const { t } = useTranslation()
+  return <h1 className="text-2xl font-semibold tracking-tight">{t('confirm.title')}</h1>
 }
 
 function LinkError({ problem }: { problem: Problem }) {
+  const { t } = useTranslation()
   return (
     <>
       <Heading />
       <Alert tone="error" testId="confirm-error">
-        {messageFor(problem)} Peça um novo link fazendo o cadastro de novo com o mesmo <Email />.
+        {t(problemKey(problem))}{' '}
+        <Trans i18nKey="confirm.linkErrorHint" components={{ nowrap: noWrap }} />
       </Alert>
       <Link to="/register" className={`text-sm ${linkClass}`}>
-        Voltar ao cadastro
+        {t('confirm.backToRegister')}
       </Link>
     </>
   )
@@ -69,6 +74,8 @@ export function ConfirmPage() {
 }
 
 function ActivationFlow({ token }: { token: string | null }) {
+  const { t } = useTranslation()
+  const errorText = useFieldErrorText()
   const summary = useQuery({
     queryKey: ['confirmation-summary', token],
     queryFn: () => confirmationSummary(token ?? ''),
@@ -90,7 +97,7 @@ function ActivationFlow({ token }: { token: string | null }) {
     onError: (error) => {
       for (const fieldError of toProblem(error).errors ?? []) {
         if (fieldError.field === 'password') {
-          form.setError('password', { message: fieldError.message })
+          form.setError('password', { type: SERVER_ERROR, message: fieldError.message })
         }
       }
     },
@@ -101,13 +108,13 @@ function ActivationFlow({ token }: { token: string | null }) {
       <>
         <Heading />
         <Alert tone="success" testId="confirm-success">
-          Conta ativada. Você já pode entrar com o seu <Email /> e a senha que acabou de criar.
+          <Trans i18nKey="confirm.success" components={{ nowrap: noWrap }} />
         </Alert>
         <Link
           to="/login"
           className="inline-flex w-fit items-center justify-center rounded-md bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800"
         >
-          Ir para o login
+          {t('confirm.goToLogin')}
         </Link>
       </>
     )
@@ -131,7 +138,7 @@ function ActivationFlow({ token }: { token: string | null }) {
       <>
         <Heading />
         <p role="status" className="text-sm text-slate-600">
-          Carregando os dados do cadastro...
+          {t('confirm.loadingSummary')}
         </p>
       </>
     )
@@ -141,15 +148,15 @@ function ActivationFlow({ token }: { token: string | null }) {
     return (
       <>
         <Heading />
-        <Alert tone="error">{messageFor(toProblem(summary.error))}</Alert>
+        <Alert tone="error">{t(problemKey(toProblem(summary.error)))}</Alert>
         <Button
           type="button"
           className="w-fit"
           loading={summary.isFetching}
-          loadingLabel="Tentando..."
+          loadingLabel={t('confirm.retrying')}
           onClick={() => void summary.refetch()}
         >
-          Tentar de novo
+          {t('confirm.retry')}
         </Button>
       </>
     )
@@ -159,9 +166,7 @@ function ActivationFlow({ token }: { token: string | null }) {
     <>
       <div className="flex flex-col gap-1">
         <Heading />
-        <p className="text-sm text-slate-600">
-          Confira os dados do cadastro e crie a senha da sua conta.
-        </p>
+        <p className="text-sm text-slate-600">{t('confirm.intro')}</p>
       </div>
       <section
         aria-labelledby="summary-title"
@@ -169,48 +174,47 @@ function ActivationFlow({ token }: { token: string | null }) {
         className="flex flex-col gap-3 rounded-md border border-slate-200 bg-white p-4 shadow-sm"
       >
         <h2 id="summary-title" className="font-medium">
-          Estes são os seus dados?
+          {t('confirm.summaryTitle')}
         </h2>
         <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-sm">
-          <dt className="text-slate-500">Nome</dt>
+          <dt className="text-slate-500">{t('confirm.name')}</dt>
           <dd className="font-medium text-slate-900">{summary.data.maskedName}</dd>
-          <dt className="text-slate-500">CPF</dt>
+          <dt className="text-slate-500">{t('confirm.cpf')}</dt>
           <dd className="font-medium text-slate-900 tabular-nums">{summary.data.maskedDocument}</dd>
         </dl>
         <p className="text-sm text-slate-600">
-          Não são os seus? Não continue:{' '}
-          <Link to="/register" className={linkClass}>
-            faça o cadastro de novo
-          </Link>
-          . Você vai receber um novo link, e este deixará de funcionar.
+          <Trans
+            i18nKey="confirm.notYours"
+            components={{ anchor: <Link to="/register" className={linkClass} /> }}
+          />
         </p>
       </section>
       <form
         noValidate
         onSubmit={form.handleSubmit((data) => activation.mutate(data))}
         className="flex flex-col gap-4"
-        aria-label="Ativação da conta"
+        aria-label={t('confirm.title')}
       >
         <TextField
-          label="Crie uma senha"
+          label={t('confirm.password')}
           type="password"
           autoComplete="new-password"
-          hint="De 8 a 72 caracteres."
-          error={errors.password?.message}
+          hint={t('confirm.passwordHint')}
+          error={errorText(errors.password)}
           {...form.register('password')}
         />
         <TextField
-          label="Repita a senha"
+          label={t('confirm.passwordConfirmation')}
           type="password"
           autoComplete="new-password"
-          error={errors.passwordConfirmation?.message}
+          error={errorText(errors.passwordConfirmation)}
           {...form.register('passwordConfirmation')}
         />
         {activationProblem && !activationProblem.errors?.length && (
-          <Alert tone="error">{messageFor(activationProblem)}</Alert>
+          <Alert tone="error">{t(problemKey(activationProblem))}</Alert>
         )}
-        <Button type="submit" loading={activation.isPending} loadingLabel="Ativando...">
-          Ativar conta
+        <Button type="submit" loading={activation.isPending} loadingLabel={t('confirm.submitting')}>
+          {t('confirm.submit')}
         </Button>
       </form>
     </>

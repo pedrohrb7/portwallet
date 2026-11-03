@@ -2,6 +2,7 @@ package com.portwallet.auth.api;
 
 import com.portwallet.auth.application.RegisterCommand;
 import com.portwallet.auth.domain.Cpf;
+import com.portwallet.shared.i18n.Language;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -29,8 +30,8 @@ public record RegisterRequest(
         document = document == null ? null : document.strip();
     }
 
-    RegisterCommand toCommand() {
-        return new RegisterCommand(name, email, Cpf.parse(document).orElseThrow());
+    RegisterCommand toCommand(Language language) {
+        return new RegisterCommand(name, email, Cpf.parse(document).orElseThrow(), language);
     }
 
     @Override

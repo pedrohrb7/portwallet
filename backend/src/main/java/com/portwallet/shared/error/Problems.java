@@ -5,7 +5,10 @@ import java.util.List;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 
-/** Factory for the generic problem types of the catalog in {@code docs/conventions.md}. */
+/**
+ * Factory for the generic problem types of the catalog in {@code docs/conventions.md}. Titles are filled in later,
+ * in the language of the request, by {@link ProblemTitles}.
+ */
 public final class Problems {
 
     public static final String VALIDATION_ERROR = "validation-error";
@@ -20,29 +23,28 @@ public final class Problems {
     private Problems() {
     }
 
-    public static ProblemDetail of(HttpStatusCode status, String type, String title) {
+    public static ProblemDetail of(HttpStatusCode status, String type) {
         ProblemDetail problem = ProblemDetail.forStatus(status);
         problem.setType(URI.create(type));
-        problem.setTitle(title);
         return problem;
     }
 
     public static ProblemDetail validation(List<FieldError> errors) {
-        ProblemDetail problem = of(HttpStatusCode.valueOf(400), VALIDATION_ERROR, "Dados inválidos");
+        ProblemDetail problem = of(HttpStatusCode.valueOf(400), VALIDATION_ERROR);
         problem.setProperty("errors", errors);
         return problem;
     }
 
     public static ProblemDetail unauthorized() {
-        return of(HttpStatusCode.valueOf(401), UNAUTHORIZED, "Autenticação necessária");
+        return of(HttpStatusCode.valueOf(401), UNAUTHORIZED);
     }
 
     public static ProblemDetail forbidden() {
-        return of(HttpStatusCode.valueOf(403), FORBIDDEN, "Acesso negado");
+        return of(HttpStatusCode.valueOf(403), FORBIDDEN);
     }
 
     public static ProblemDetail internalError() {
-        return of(HttpStatusCode.valueOf(500), INTERNAL_ERROR, "Erro inesperado");
+        return of(HttpStatusCode.valueOf(500), INTERNAL_ERROR);
     }
 
     /** Maps a status raised by the framework itself to a generic problem of the catalog. */
@@ -51,13 +53,11 @@ public final class Problems {
             case 400 -> validation(List.of());
             case 401 -> unauthorized();
             case 403 -> forbidden();
-            case 404 -> of(status, NOT_FOUND, "Recurso não encontrado");
-            case 405 -> of(status, METHOD_NOT_ALLOWED, "Método não permitido");
-            case 406 -> of(status, NOT_ACCEPTABLE, "Formato de resposta não suportado");
-            case 415 -> of(status, UNSUPPORTED_MEDIA_TYPE, "Formato de requisição não suportado");
-            default -> status.is4xxClientError()
-                    ? of(status, VALIDATION_ERROR, "Requisição inválida")
-                    : of(status, INTERNAL_ERROR, "Erro inesperado");
+            case 404 -> of(status, NOT_FOUND);
+            case 405 -> of(status, METHOD_NOT_ALLOWED);
+            case 406 -> of(status, NOT_ACCEPTABLE);
+            case 415 -> of(status, UNSUPPORTED_MEDIA_TYPE);
+            default -> of(status, status.is4xxClientError() ? VALIDATION_ERROR : INTERNAL_ERROR);
         };
     }
 

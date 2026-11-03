@@ -4,7 +4,7 @@
 
 Carteira digital fullstack de portfólio: usuários abrem conta, depositam, transferem entre si e consultam extrato, com idempotência, circuit breaker, rate limit e segurança implementados, visíveis na interface e provados por testes.
 
-> Ambiente de demonstração, sem dinheiro real. O produto é pensado para usuários brasileiros, por isso a interface é em português; o código e a documentação técnica são em inglês ([ADR 0006](docs/adr/0006-english-docs-portuguese-ui.md)).
+> Ambiente de demonstração, sem dinheiro real. O produto é pensado para usuários brasileiros, com o português do Brasil como idioma padrão; a interface, as mensagens da API e os e-mails também estão disponíveis em inglês, espanhol e francês, escolhidos pelo navegador ou pelo seletor de idioma no rodapé de cada página ([ADR 0007](docs/adr/0007-multilingual-product.md)). O código e a documentação técnica são em inglês ([ADR 0006](docs/adr/0006-english-docs-portuguese-ui.md)).
 
 O escopo completo está no [PRD](PRD.md). Specs técnicas, planos de implementação, manuais de uso, convenções e decisões de arquitetura ficam em [`docs/`](docs/README.md), em inglês.
 

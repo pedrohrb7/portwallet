@@ -19,7 +19,7 @@ docs/
 
 Planned refactors live in [`backlog/refactor/`](backlog/refactor/README.md), one dated file per refactor, created from that folder's `TEMPLATE.md`.
 
-All documentation is written in English; the product UI is in Brazilian Portuguese ([ADR 0006](adr/0006-english-docs-portuguese-ui.md)). UI texts quoted in the docs (labels, messages, e-mails) stay in Portuguese, exactly as the user sees them.
+All documentation is written in English ([ADR 0006](adr/0006-english-docs-portuguese-ui.md)). The product speaks Brazilian Portuguese (default), English, Spanish and French ([ADR 0007](adr/0007-multilingual-product.md)); UI texts quoted in the docs (labels, messages, e-mails) are in Portuguese, the default language, exactly as the user sees them.
 
 ## Workflow
 
@@ -58,6 +58,7 @@ A spec describes a feature and evolves with it. An ADR records a decision that r
 | 2 | Application base (errors, security, frontend shell) | [spec](features/nfr-application-base/spec.md) | [plan](features/nfr-application-base/plan.md) | Done |
 | 2 | API documentation (OpenAPI and Swagger UI) | [spec](features/nfr-api-docs/spec.md) | [plan](features/nfr-api-docs/plan.md) | Done |
 | 2 | FR-01 Registration and confirmation ([manual](features/fr-01-registration/manual.md)) | [spec](features/fr-01-registration/spec.md) | [plan](features/fr-01-registration/plan.md) | Done |
+| 2 | Internationalization (pt-BR, en, es, fr) | [spec](features/nfr-i18n/spec.md) | [plan](features/nfr-i18n/plan.md) | Done |
 | 2 | FR-02 Login and refresh | [spec](features/fr-02-login/spec.md) | [plan](features/fr-02-login/plan.md) | Approved |
 | 2 | FR-03 Logout | [spec](features/fr-03-logout/spec.md) | [plan](features/fr-03-logout/plan.md) | Approved |
 | 2 | Ledger and concurrency | [spec](features/nfr-ledger-concurrency/spec.md) | [plan](features/nfr-ledger-concurrency/plan.md) | Approved |
@@ -80,3 +81,4 @@ The table order is the Phase 2 implementation order: each feature depends only o
 | [0004](adr/0004-money-as-string-in-json.md) | Money as a string in JSON |
 | [0005](adr/0005-password-set-on-activation.md) | Password set on activation |
 | [0006](adr/0006-english-docs-portuguese-ui.md) | English documentation, Brazilian Portuguese UI |
+| [0007](adr/0007-multilingual-product.md) | Multilingual product |

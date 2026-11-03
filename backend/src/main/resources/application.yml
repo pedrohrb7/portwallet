@@ -17,6 +17,11 @@ spring:
   threads:
     virtual:
       enabled: true
+  # User-facing texts in messages*.properties (see docs/features/nfr-i18n). A missing key falls back to the base
+  # bundle (pt-BR), never to the server's own locale.
+  messages:
+    basename: messages
+    fallback-to-system-locale: false
 
 server:
   port: ${PORT:8080}

@@ -82,6 +82,8 @@ abstract class OpenApiDocsContract {
                 .andExpect(jsonPath(examples400 + "['invalid-token'].value.title").value("Link inválido ou expirado"))
                 .andExpect(jsonPath(examples422 + "['insufficient-balance'].value.type").value("insufficient-balance"))
                 .andExpect(jsonPath(examples422 + "['insufficient-balance'].value.status").value(422))
+                // Read from the pt-BR bundle, the same text the API sends by default.
+                .andExpect(jsonPath(examples422 + "['insufficient-balance'].value.title").value("Saldo insuficiente"))
                 .andExpect(jsonPath(examples422 + "['validation-error']").doesNotExist())
                 .andExpect(jsonPath(responses + "['400'].description").value(containsString("`invalid-token`")))
                 .andExpect(jsonPath(responses + "['400'].content" + PROBLEM_JSON + ".schema.$ref")
@@ -161,10 +163,8 @@ abstract class OpenApiDocsContract {
 
         @PostMapping(PUBLIC_PATH)
         @SecurityRequirements
-        @ApiProblem(status = 400, type = "invalid-token", title = "Link inválido ou expirado",
-                description = "Token desconhecido")
-        @ApiProblem(status = 422, type = "insufficient-balance", title = "Saldo insuficiente",
-                description = "Saldo menor que o valor")
+        @ApiProblem(status = 400, type = "invalid-token", description = "Token desconhecido")
+        @ApiProblem(status = 422, type = "insufficient-balance", description = "Saldo menor que o valor")
         SampleResponse publicSample(@RequestBody SampleRequest request) {
             return new SampleResponse(Money.of("1"));
         }

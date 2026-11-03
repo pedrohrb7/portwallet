@@ -1,19 +1,27 @@
 import { useQuery } from '@tanstack/react-query'
-import { useState, type SubmitEvent } from 'react'
+import { useMemo, useState, type SubmitEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import { fetchInbox } from '../../api/inbox'
-import { messageFor, toProblem } from '../../api/problem'
+import { problemKey, toProblem } from '../../api/problem'
 import { Alert } from '../../components/Alert'
 import { Button } from '../../components/Button'
 import { TextField } from '../../components/TextField'
-
-const dateFormat = new Intl.DateTimeFormat('pt-BR', {
-  dateStyle: 'short',
-  timeStyle: 'short',
-  timeZone: 'America/Sao_Paulo',
-})
+import { currentLanguage } from '../../i18n'
 
 export function InboxPage() {
+  const { t } = useTranslation()
+  const language = currentLanguage()
+  // Format of the language in use; the time zone is always the product's, whatever the language.
+  const dateFormat = useMemo(
+    () =>
+      new Intl.DateTimeFormat(language, {
+        dateStyle: 'short',
+        timeStyle: 'short',
+        timeZone: 'America/Sao_Paulo',
+      }),
+    [language],
+  )
   const [searchParams, setSearchParams] = useSearchParams()
   const recipient = searchParams.get('to') ?? ''
   const [draft, setDraft] = useState(recipient)
@@ -37,33 +45,30 @@ export function InboxPage() {
   return (
     <>
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Caixa de entrada demo</h1>
-        <p className="text-sm text-slate-600">
-          E-mails enviados pelo serviço de notificação simulado. Só existe no ambiente de
-          demonstração.
-        </p>
+        <h1 className="text-2xl font-semibold tracking-tight">{t('inbox.title')}</h1>
+        <p className="text-sm text-slate-600">{t('inbox.intro')}</p>
       </div>
       <form onSubmit={onSubmit} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
           <TextField
-            label="E-mail"
+            label={t('inbox.email')}
             type="email"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             data-testid="inbox-email"
           />
         </div>
-        <Button type="submit" loading={inbox.isFetching} loadingLabel="Buscando...">
-          Ver e-mails
+        <Button type="submit" loading={inbox.isFetching} loadingLabel={t('inbox.submitting')}>
+          {t('inbox.submit')}
         </Button>
       </form>
 
-      {inbox.isError && <Alert tone="error">{messageFor(toProblem(inbox.error))}</Alert>}
+      {inbox.isError && <Alert tone="error">{t(problemKey(toProblem(inbox.error)))}</Alert>}
       {inbox.isSuccess && inbox.data.length === 0 && (
-        <Alert tone="info">Nenhum e-mail para {recipient}.</Alert>
+        <Alert tone="info">{t('inbox.empty', { recipient })}</Alert>
       )}
       {inbox.isSuccess && inbox.data.length > 0 && (
-        <ul className="flex flex-col gap-3" aria-label="Mensagens">
+        <ul className="flex flex-col gap-3" aria-label={t('inbox.listLabel')}>
           {inbox.data.map((message) => (
             <li
               key={message.id}
@@ -84,7 +89,7 @@ export function InboxPage() {
                   href={message.link}
                   className="w-fit text-sm font-medium text-slate-900 underline underline-offset-4"
                 >
-                  Abrir link
+                  {t('inbox.openLink')}
                 </a>
               )}
             </li>

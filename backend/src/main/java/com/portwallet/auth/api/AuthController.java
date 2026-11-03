@@ -2,6 +2,7 @@ package com.portwallet.auth.api;
 
 import com.portwallet.auth.application.ConfirmationService;
 import com.portwallet.auth.application.RegistrationService;
+import com.portwallet.shared.i18n.Language;
 import com.portwallet.shared.openapi.ApiProblem;
 import com.portwallet.shared.validation.MaxUtf8Bytes;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.util.Locale;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,17 +28,20 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Autenticação")
 class AuthController {
 
-    static final String REGISTER_MESSAGE =
+    /** Example of the registration message in the docs; the real one follows the language of the request. */
+    private static final String REGISTER_MESSAGE_EXAMPLE =
             "Se os dados estiverem corretos, você receberá um e-mail para ativar a conta.";
     private static final String TOKEN_DESCRIPTION = "Token do link de confirmação (o que vem depois de `#token=`)";
     private static final String TOKEN_EXAMPLE = "q2VxN3V0c2Ftb3BsZS10b2tlbi1kZS0zMi1ieXRlcw";
 
     private final RegistrationService registration;
     private final ConfirmationService confirmation;
+    private final MessageSource messages;
 
-    AuthController(RegistrationService registration, ConfirmationService confirmation) {
+    AuthController(RegistrationService registration, ConfirmationService confirmation, MessageSource messages) {
         this.registration = registration;
         this.confirmation = confirmation;
+        this.messages = messages;
     }
 
     @PostMapping("/register")
@@ -46,9 +52,10 @@ class AuthController {
             description = "A resposta é sempre a mesma, exista ou não o e-mail ou o CPF, para não revelar contas "
                     + "cadastradas. Só o dono dos dados descobre o que aconteceu, por e-mail.")
     @ApiResponse(responseCode = "202", description = "Pedido recebido; a mesma resposta em todos os casos")
-    RegisterResponse register(@Valid @RequestBody RegisterRequest request) {
-        registration.register(request.toCommand());
-        return new RegisterResponse(REGISTER_MESSAGE);
+    RegisterResponse register(@Valid @RequestBody RegisterRequest request, Locale locale) {
+        registration.register(request.toCommand(Language.of(locale)));
+        // Same message in every case for a given language, so it reveals nothing about existing accounts.
+        return new RegisterResponse(messages.getMessage("auth.register.accepted", null, locale));
     }
 
     @PostMapping("/confirm/summary")
@@ -59,8 +66,7 @@ class AuthController {
                     + "ativar: se alguém refez o cadastro com outros dados, o link mais recente mostra esses dados. "
                     + "O token vai no corpo, e não na URL, para não aparecer em logs de acesso.")
     @ApiResponse(responseCode = "200", description = "Dados do cadastro, mascarados")
-    @ApiProblem(status = 400, type = "invalid-token", title = "Link inválido ou expirado",
-            description = "Token desconhecido, expirado ou já usado")
+    @ApiProblem(status = 400, type = "invalid-token", description = "Token desconhecido, expirado ou já usado")
     SummaryResponse summary(@Valid @RequestBody SummaryRequest request) {
         ConfirmationService.RegistrationSummary summary = confirmation.summary(request.token());
         return new SummaryResponse(summary.maskedName(), summary.maskedDocument());
@@ -73,15 +79,14 @@ class AuthController {
             description = "Só quem tem o link, e portanto acesso ao e-mail, escolhe a senha. Senha gravada, usuário "
                     + "ativado, link consumido e conta aberta acontecem na mesma transação.")
     @ApiResponse(responseCode = "200", description = "Conta ativada")
-    @ApiProblem(status = 400, type = "invalid-token", title = "Link inválido ou expirado",
-            description = "Token desconhecido, expirado ou já usado")
+    @ApiProblem(status = 400, type = "invalid-token", description = "Token desconhecido, expirado ou já usado")
     ConfirmResponse confirm(@Valid @RequestBody ConfirmRequest request) {
         confirmation.confirm(request.token(), request.password());
         return new ConfirmResponse("ACTIVE");
     }
 
     record RegisterResponse(
-            @Schema(example = REGISTER_MESSAGE)
+            @Schema(example = REGISTER_MESSAGE_EXAMPLE)
             String message) {
     }
 

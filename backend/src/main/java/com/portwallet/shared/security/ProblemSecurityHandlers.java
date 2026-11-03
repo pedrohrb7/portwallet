@@ -1,6 +1,7 @@
 package com.portwallet.shared.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.portwallet.shared.error.ProblemTitles;
 import com.portwallet.shared.error.Problems;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,14 +14,22 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.web.servlet.LocaleResolver;
 
-/** Writes 401 and 403 raised by Spring Security in the same Problem Details format as the controllers. */
+/**
+ * Writes 401 and 403 raised by Spring Security in the same Problem Details format as the controllers. These run in
+ * the filter chain, before DispatcherServlet, so the language is resolved here with the same LocaleResolver.
+ */
 class ProblemSecurityHandlers implements AuthenticationEntryPoint, AccessDeniedHandler {
 
     private final ObjectMapper objectMapper;
+    private final ProblemTitles titles;
+    private final LocaleResolver localeResolver;
 
-    ProblemSecurityHandlers(ObjectMapper objectMapper) {
+    ProblemSecurityHandlers(ObjectMapper objectMapper, ProblemTitles titles, LocaleResolver localeResolver) {
         this.objectMapper = objectMapper;
+        this.titles = titles;
+        this.localeResolver = localeResolver;
     }
 
     @Override
@@ -39,6 +48,7 @@ class ProblemSecurityHandlers implements AuthenticationEntryPoint, AccessDeniedH
     private void write(HttpServletRequest request, HttpServletResponse response, ProblemDetail problem)
             throws IOException {
         problem.setInstance(URI.create(request.getRequestURI()));
+        titles.apply(problem, localeResolver.resolveLocale(request));
         response.setStatus(problem.getStatus());
         response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
         objectMapper.writeValue(response.getOutputStream(), problem);

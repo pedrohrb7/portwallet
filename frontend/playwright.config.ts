@@ -18,6 +18,8 @@ export default defineConfig({
     : [['html', { open: 'never' }], ['list']],
   use: {
     baseURL: 'http://localhost:5173',
+    // The UI follows the browser language; the suites assert the default language unless they set their own.
+    locale: 'pt-BR',
     trace: 'on-first-retry',
     video: 'on-first-retry',
   },

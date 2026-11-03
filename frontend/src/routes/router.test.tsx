@@ -1,22 +1,21 @@
 import { screen } from '@testing-library/react'
-import axios from 'axios'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { authClient } from '../api/client'
+import { authClient, rootClient } from '../api/client'
 import { sessionStore } from '../features/auth/sessionStore'
 import { mockAdapter } from '../test/axiosMock'
 import { renderRoutes } from '../test/renderRoutes'
 import { routes } from './router'
 
 describe('app routes', () => {
-  const originalAdapter = axios.defaults.adapter
+  const originalAdapter = rootClient.defaults.adapter
 
   beforeEach(() => {
-    mockAdapter(axios, () => ({ status: 200, data: { status: 'UP' } }))
+    mockAdapter(rootClient, () => ({ status: 200, data: { status: 'UP' } }))
     mockAdapter(authClient, () => ({ status: 401, data: { type: 'unauthorized', status: 401 } }))
   })
 
   afterEach(() => {
-    axios.defaults.adapter = originalAdapter
+    rootClient.defaults.adapter = originalAdapter
     sessionStore.reset()
   })
 

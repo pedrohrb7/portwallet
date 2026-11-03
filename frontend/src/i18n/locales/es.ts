@@ -1,0 +1,115 @@
+import type { Catalog } from './pt-BR'
+
+export const es: Catalog = {
+  common: {
+    loading: 'Cargando...',
+    demoBanner: 'Entorno de demostración, sin dinero real',
+  },
+  language: {
+    label: 'Idioma',
+  },
+  nav: {
+    main: 'Principal',
+  },
+  home: {
+    tagline: 'Billetera digital con idempotencia, circuit breaker, rate limit y seguridad.',
+    createAccount: 'Crear cuenta',
+    demoInbox: 'Bandeja de entrada demo',
+  },
+  apiStatus: {
+    label: 'API:',
+    LOADING: 'Verificando...',
+    UP: 'En línea',
+    DOWN: 'Fuera de servicio',
+    UNKNOWN: 'No disponible',
+  },
+  notFound: {
+    title: 'Página no encontrada',
+    description: 'La dirección a la que accediste no existe.',
+    backHome: 'Volver al inicio',
+  },
+  register: {
+    title: 'Crear cuenta',
+    intro:
+      'Usa datos ficticios: este es un entorno de demostración. Creas la contraseña al activar la cuenta con el enlace enviado por correo electrónico.',
+    formLabel: 'Registro',
+    name: 'Nombre completo',
+    email: 'Correo electrónico',
+    cpf: 'CPF',
+    cpfHint: 'Genera un CPF ficticio válido para probar.',
+    submit: 'Crear cuenta',
+    submitting: 'Enviando...',
+    haveAccount: '¿Ya tienes cuenta?',
+    signIn: 'Iniciar sesión',
+    checkEmail: 'Revisa tu correo electrónico',
+    demoInboxNotice:
+      'En este entorno de demostración, los correos llegan a la <anchor>bandeja de entrada demo</anchor>.',
+  },
+  confirm: {
+    title: 'Activación de la cuenta',
+    linkErrorHint:
+      'Pide un nuevo enlace registrándote de nuevo con el mismo <nowrap>correo electrónico</nowrap>.',
+    backToRegister: 'Volver al registro',
+    success:
+      'Cuenta activada. Ya puedes iniciar sesión con tu <nowrap>correo electrónico</nowrap> y la contraseña que acabas de crear.',
+    goToLogin: 'Ir a iniciar sesión',
+    loadingSummary: 'Cargando los datos del registro...',
+    retry: 'Intentar de nuevo',
+    retrying: 'Intentando...',
+    intro: 'Revisa los datos del registro y crea la contraseña de tu cuenta.',
+    summaryTitle: '¿Estos son tus datos?',
+    name: 'Nombre',
+    cpf: 'CPF',
+    notYours:
+      '¿No son tuyos? No continúes: <anchor>regístrate de nuevo</anchor>. Recibirás un nuevo enlace, y este dejará de funcionar.',
+    password: 'Crea una contraseña',
+    passwordHint: 'De 8 a 72 caracteres.',
+    passwordConfirmation: 'Repite la contraseña',
+    submit: 'Activar cuenta',
+    submitting: 'Activando...',
+  },
+  inbox: {
+    title: 'Bandeja de entrada demo',
+    intro:
+      'Correos enviados por el servicio de notificaciones simulado. Solo existe en el entorno de demostración.',
+    email: 'Correo electrónico',
+    submit: 'Ver correos',
+    submitting: 'Buscando...',
+    empty: 'No hay correos para {{recipient}}.',
+    listLabel: 'Mensajes',
+    openLink: 'Abrir enlace',
+  },
+  validation: {
+    nameRequired: 'Introduce tu nombre completo',
+    nameTooLong: 'Usa como máximo 100 caracteres',
+    emailRequired: 'Introduce tu correo electrónico',
+    emailTooLong: 'Correo electrónico demasiado largo',
+    emailInvalid: 'Correo electrónico no válido',
+    cpfInvalid: 'CPF no válido',
+    passwordTooShort: 'Usa al menos 8 caracteres',
+    passwordTooLong: 'Usa como máximo 72 caracteres',
+    passwordTooManyBytes: 'Contraseña demasiado larga',
+    passwordConfirmationRequired: 'Repite la contraseña',
+    passwordMismatch: 'Las contraseñas no coinciden',
+  },
+  problem: {
+    'validation-error': 'Revisa los datos introducidos.',
+    'invalid-cursor': 'No se pudieron cargar más elementos. Recarga la página.',
+    'invalid-token': 'Enlace no válido o caducado.',
+    unauthorized: 'Tu sesión ha caducado. Inicia sesión de nuevo.',
+    'invalid-credentials': 'Correo electrónico o contraseña no válidos.',
+    'invalid-refresh-token': 'Tu sesión ha caducado. Inicia sesión de nuevo.',
+    forbidden: 'No tienes permiso para acceder a esto.',
+    'account-blocked': 'Tu cuenta está bloqueada para movimientos.',
+    'not-found': 'No encontrado.',
+    'recipient-not-found': 'Destinatario no encontrado o no disponible.',
+    'concurrency-conflict': 'Demasiadas operaciones al mismo tiempo. Inténtalo de nuevo.',
+    'insufficient-balance': 'Saldo insuficiente.',
+    'daily-limit-exceeded': 'Importe superior al límite diario disponible.',
+    'self-transfer': 'No puedes transferir a tu propia cuenta.',
+    'recipient-unavailable': 'Destinatario no disponible. Búscalo de nuevo.',
+    'network-error':
+      'Sin conexión con el servidor. Revisa tu conexión a internet e inténtalo de nuevo.',
+    fallback: 'Algo salió mal. Inténtalo de nuevo en unos instantes.',
+  },
+}

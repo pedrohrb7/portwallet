@@ -1,23 +1,22 @@
 import { z } from 'zod'
+import { validationMessage as message } from '../../i18n/fieldErrors'
 import { isValidCpf } from '../../lib/cpf'
 
 const utf8Bytes = (value: string) => new TextEncoder().encode(value).length
 
+// Messages are translation keys, translated when shown (useFieldErrorText), so they follow language changes.
+
 /** Same rules as the backend RegisterRequest. */
 export const registerSchema = z.object({
-  name: z
-    .string()
-    .trim()
-    .min(2, 'Informe o nome completo')
-    .max(100, 'Use no máximo 100 caracteres'),
+  name: z.string().trim().min(2, message('nameRequired')).max(100, message('nameTooLong')),
   email: z
     .string()
     .trim()
     .toLowerCase()
-    .min(1, 'Informe o e-mail')
-    .max(254, 'E-mail longo demais')
-    .pipe(z.email('E-mail inválido')),
-  document: z.string().trim().refine(isValidCpf, 'CPF inválido'),
+    .min(1, message('emailRequired'))
+    .max(254, message('emailTooLong'))
+    .pipe(z.email(message('emailInvalid'))),
+  document: z.string().trim().refine(isValidCpf, message('cpfInvalid')),
 })
 
 export type RegisterInput = z.input<typeof registerSchema>
@@ -28,13 +27,13 @@ export const activationSchema = z
   .object({
     password: z
       .string()
-      .min(8, 'Use pelo menos 8 caracteres')
-      .max(72, 'Use no máximo 72 caracteres')
-      .refine((value) => utf8Bytes(value) <= 72, 'Senha longa demais'),
-    passwordConfirmation: z.string().min(1, 'Repita a senha'),
+      .min(8, message('passwordTooShort'))
+      .max(72, message('passwordTooLong'))
+      .refine((value) => utf8Bytes(value) <= 72, message('passwordTooManyBytes')),
+    passwordConfirmation: z.string().min(1, message('passwordConfirmationRequired')),
   })
   .refine((data) => data.password === data.passwordConfirmation, {
-    message: 'As senhas não são iguais',
+    message: message('passwordMismatch'),
     path: ['passwordConfirmation'],
   })
 

@@ -1,0 +1,115 @@
+import type { Catalog } from './pt-BR'
+
+// French typography: a no-break space (U+00A0) precedes ":", "?", "!" and ";".
+export const fr: Catalog = {
+  common: {
+    loading: 'Chargement...',
+    demoBanner: 'Environnement de démonstration, sans argent réel',
+  },
+  language: {
+    label: 'Langue',
+  },
+  nav: {
+    main: 'Principal',
+  },
+  home: {
+    tagline: 'Portefeuille numérique avec idempotence, circuit breaker, rate limiting et sécurité.',
+    createAccount: 'Créer un compte',
+    demoInbox: 'Boîte de réception démo',
+  },
+  apiStatus: {
+    label: 'API :',
+    LOADING: 'Vérification...',
+    UP: 'En ligne',
+    DOWN: 'Hors service',
+    UNKNOWN: 'Indisponible',
+  },
+  notFound: {
+    title: 'Page introuvable',
+    description: 'L’adresse demandée n’existe pas.',
+    backHome: 'Retour à l’accueil',
+  },
+  register: {
+    title: 'Créer un compte',
+    intro:
+      'Utilisez des données fictives : ceci est un environnement de démonstration. Vous créez votre mot de passe en activant le compte avec le lien envoyé par e-mail.',
+    formLabel: 'Inscription',
+    name: 'Nom complet',
+    email: 'E-mail',
+    cpf: 'CPF',
+    cpfHint: 'Générez un CPF fictif valide pour tester.',
+    submit: 'Créer un compte',
+    submitting: 'Envoi...',
+    haveAccount: 'Vous avez déjà un compte ?',
+    signIn: 'Se connecter',
+    checkEmail: 'Consultez vos e-mails',
+    demoInboxNotice:
+      'Dans cet environnement de démonstration, les e-mails arrivent dans la <anchor>boîte de réception démo</anchor>.',
+  },
+  confirm: {
+    title: 'Activation du compte',
+    linkErrorHint:
+      'Demandez un nouveau lien en vous inscrivant à nouveau avec le même <nowrap>e-mail</nowrap>.',
+    backToRegister: 'Retour à l’inscription',
+    success:
+      'Compte activé. Vous pouvez maintenant vous connecter avec votre <nowrap>e-mail</nowrap> et le mot de passe que vous venez de créer.',
+    goToLogin: 'Aller à la connexion',
+    loadingSummary: 'Chargement des informations d’inscription...',
+    retry: 'Réessayer',
+    retrying: 'Nouvel essai...',
+    intro: 'Vérifiez les informations d’inscription et créez le mot de passe de votre compte.',
+    summaryTitle: 'Ces informations sont-elles les vôtres ?',
+    name: 'Nom',
+    cpf: 'CPF',
+    notYours:
+      'Ce ne sont pas les vôtres ? Ne continuez pas : <anchor>inscrivez-vous à nouveau</anchor>. Vous recevrez un nouveau lien, et celui-ci ne fonctionnera plus.',
+    password: 'Créez un mot de passe',
+    passwordHint: 'De 8 à 72 caractères.',
+    passwordConfirmation: 'Répétez le mot de passe',
+    submit: 'Activer le compte',
+    submitting: 'Activation...',
+  },
+  inbox: {
+    title: 'Boîte de réception démo',
+    intro:
+      'E-mails envoyés par le service de notification simulé. N’existe que dans l’environnement de démonstration.',
+    email: 'E-mail',
+    submit: 'Voir les e-mails',
+    submitting: 'Recherche...',
+    empty: 'Aucun e-mail pour {{recipient}}.',
+    listLabel: 'Messages',
+    openLink: 'Ouvrir le lien',
+  },
+  validation: {
+    nameRequired: 'Indiquez votre nom complet',
+    nameTooLong: 'Utilisez 100 caractères au maximum',
+    emailRequired: 'Indiquez votre e-mail',
+    emailTooLong: 'E-mail trop long',
+    emailInvalid: 'E-mail invalide',
+    cpfInvalid: 'CPF invalide',
+    passwordTooShort: 'Utilisez au moins 8 caractères',
+    passwordTooLong: 'Utilisez 72 caractères au maximum',
+    passwordTooManyBytes: 'Mot de passe trop long',
+    passwordConfirmationRequired: 'Répétez le mot de passe',
+    passwordMismatch: 'Les mots de passe ne correspondent pas',
+  },
+  problem: {
+    'validation-error': 'Vérifiez les informations saisies.',
+    'invalid-cursor': 'Impossible de charger plus d’éléments. Rechargez la page.',
+    'invalid-token': 'Lien invalide ou expiré.',
+    unauthorized: 'Votre session a expiré. Reconnectez-vous.',
+    'invalid-credentials': 'E-mail ou mot de passe invalide.',
+    'invalid-refresh-token': 'Votre session a expiré. Reconnectez-vous.',
+    forbidden: 'Vous n’avez pas l’autorisation d’accéder à ceci.',
+    'account-blocked': 'Votre compte est bloqué pour les opérations.',
+    'not-found': 'Introuvable.',
+    'recipient-not-found': 'Destinataire introuvable ou indisponible.',
+    'concurrency-conflict': 'Trop d’opérations en même temps. Réessayez.',
+    'insufficient-balance': 'Solde insuffisant.',
+    'daily-limit-exceeded': 'Montant supérieur à la limite quotidienne disponible.',
+    'self-transfer': 'Impossible de virer vers votre propre compte.',
+    'recipient-unavailable': 'Destinataire indisponible. Recherchez-le à nouveau.',
+    'network-error': 'Pas de connexion au serveur. Vérifiez votre connexion Internet et réessayez.',
+    fallback: 'Une erreur s’est produite. Réessayez dans quelques instants.',
+  },
+}

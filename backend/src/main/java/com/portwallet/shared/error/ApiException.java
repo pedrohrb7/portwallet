@@ -6,19 +6,18 @@ import org.springframework.http.ProblemDetail;
 
 /**
  * Base class for business errors that map to a Problem Details response with a stable {@code type}.
- * The message is never sent to the client; only {@code type}, {@code title} and the extra properties are.
+ * The message is never sent to the client; only {@code type}, {@code title} and the extra properties are. The title
+ * comes from the {@code type} in the language of the request ({@link ProblemTitles}).
  */
 public abstract class ApiException extends RuntimeException {
 
     private final HttpStatus status;
     private final String type;
-    private final String title;
 
-    protected ApiException(HttpStatus status, String type, String title) {
+    protected ApiException(HttpStatus status, String type) {
         super(type);
         this.status = status;
         this.type = type;
-        this.title = title;
     }
 
     public HttpStatus status() {
@@ -32,7 +31,6 @@ public abstract class ApiException extends RuntimeException {
     public ProblemDetail toProblemDetail() {
         ProblemDetail problem = ProblemDetail.forStatus(status);
         problem.setType(URI.create(type));
-        problem.setTitle(title);
         customize(problem);
         return problem;
     }

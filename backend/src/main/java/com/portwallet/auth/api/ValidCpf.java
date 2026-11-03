@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Constraint(validatedBy = ValidCpf.Validator.class)
 public @interface ValidCpf {
 
-    String message() default "CPF inválido";
+    String message() default "{validation.cpf}";
 
     Class<?>[] groups() default {};
 

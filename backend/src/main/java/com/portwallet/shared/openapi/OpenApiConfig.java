@@ -1,5 +1,7 @@
 package com.portwallet.shared.openapi;
 
+import com.portwallet.shared.error.ProblemTitles;
+import com.portwallet.shared.i18n.Language;
 import com.portwallet.shared.money.Money;
 import com.portwallet.shared.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -25,6 +27,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -46,12 +49,15 @@ public class OpenApiConfig {
     static final String PROBLEM_SCHEMA = "Problem";
     static final String PROBLEM_MEDIA_TYPE = "application/problem+json";
 
-    private static final ProblemDoc VALIDATION_ERROR = new ProblemDoc(
-            400, "validation-error", "Dados inválidos", "Campos ou parâmetros inválidos; `errors` lista cada campo");
-    private static final ProblemDoc UNAUTHORIZED = new ProblemDoc(
-            401, "unauthorized", "Autenticação necessária", "Access token ausente, inválido ou expirado");
-    private static final ProblemDoc INTERNAL_ERROR =
-            new ProblemDoc(500, "internal-error", "Erro inesperado", "Erro inesperado; os detalhes ficam só no log");
+    private static final ProblemType VALIDATION_ERROR =
+            new ProblemType(400, "validation-error", "Campos ou parâmetros inválidos; `errors` lista cada campo");
+    private static final ProblemType UNAUTHORIZED =
+            new ProblemType(401, "unauthorized", "Access token ausente, inválido ou expirado");
+    private static final ProblemType INTERNAL_ERROR =
+            new ProblemType(500, "internal-error", "Erro inesperado; os detalhes ficam só no log");
+
+    /** The document is in the default language; the API itself answers in the language of `Accept-Language`. */
+    private static final Locale DOCS_LOCALE = Language.DEFAULT.locale();
 
     static {
         // Money is serialized as a string with two decimal places (ADR 0004), not as an object.
@@ -71,7 +77,8 @@ public class OpenApiConfig {
                     Carteira digital de portfólio. Ambiente de demonstração, sem dinheiro real.
 
                     Erros seguem Problem Details (RFC 9457) com um `type` estável. Valores monetários \
-                    são strings com duas casas decimais. Para chamar endpoints protegidos, faça login e \
+                    são strings com duas casas decimais. Textos para o usuário (como o `title` dos erros) \
+                    seguem o `Accept-Language`: pt-BR (padrão), en, es ou fr. Para chamar endpoints protegidos, faça login e \
                     use o `accessToken` em "Authorize".\
                     """))
                 .servers(List.of(new Server().url("/")))
@@ -91,19 +98,20 @@ public class OpenApiConfig {
      * example of a validation error.
      */
     @Bean
-    OperationCustomizer problemResponses() {
+    OperationCustomizer problemResponses(ProblemTitles titles) {
         return (operation, handlerMethod) -> {
-            List<ProblemDoc> problems = new ArrayList<>();
+            List<ProblemType> types = new ArrayList<>();
             if (takesInput(handlerMethod)) {
-                problems.add(VALIDATION_ERROR);
+                types.add(VALIDATION_ERROR);
             }
             if (!isPublic(handlerMethod)) {
-                problems.add(UNAUTHORIZED);
+                types.add(UNAUTHORIZED);
             }
             Arrays.stream(handlerMethod.getMethod().getAnnotationsByType(ApiProblem.class))
-                    .map(ProblemDoc::from)
-                    .forEach(problems::add);
-            problems.add(INTERNAL_ERROR);
+                    .map(ProblemType::from)
+                    .forEach(types::add);
+            types.add(INTERNAL_ERROR);
+            List<ProblemDoc> problems = types.stream().map(type -> type.document(titles)).toList();
             addProblemResponses(operation, problems);
             return operation;
         };
@@ -168,10 +176,11 @@ public class OpenApiConfig {
         return requirements != null && requirements.value().length == 0;
     }
 
+    /** Parameters filled by the framework (the authenticated user, the request locale) are not input. */
     private static boolean takesInput(HandlerMethod handlerMethod) {
         return Arrays.stream(handlerMethod.getMethodParameters())
                 .map(MethodParameter::getParameterType)
-                .anyMatch(type -> !type.equals(AuthenticatedUser.class));
+                .anyMatch(type -> !type.equals(AuthenticatedUser.class) && !type.equals(Locale.class));
     }
 
     private static Schema<?> problemSchema() {
@@ -182,7 +191,8 @@ public class OpenApiConfig {
         ObjectSchema problem = new ObjectSchema();
         problem.description("Problem Details (RFC 9457). O catálogo de `type` está em docs/conventions.md.");
         problem.addProperty("type", new StringSchema().description("Identificador estável do erro"));
-        problem.addProperty("title", new StringSchema().description("Resumo legível do erro, em português"));
+        problem.addProperty(
+                "title", new StringSchema().description("Resumo legível do erro, no idioma do `Accept-Language`"));
         problem.addProperty("status", new IntegerSchema().description("Status HTTP"));
         problem.addProperty("detail", new StringSchema().description("Detalhe opcional"));
         problem.addProperty("instance", new StringSchema().description("Caminho da requisição"));
@@ -196,11 +206,24 @@ public class OpenApiConfig {
         return problem;
     }
 
-    record ProblemDoc(int status, String type, String title, String description) {
+    /** A problem an operation can return, before its title is looked up. */
+    record ProblemType(int status, String type, String description) {
 
-        static ProblemDoc from(ApiProblem annotation) {
-            return new ProblemDoc(annotation.status(), annotation.type(), annotation.title(), annotation.description());
+        static ProblemType from(ApiProblem annotation) {
+            return new ProblemType(annotation.status(), annotation.type(), annotation.description());
         }
+
+        /** Fails at startup for a documented type without a title, instead of documenting a wrong one. */
+        ProblemDoc document(ProblemTitles titles) {
+            String title = titles.of(type, DOCS_LOCALE);
+            if (title == null) {
+                throw new IllegalStateException("No message problem." + type + ".title for @ApiProblem");
+            }
+            return new ProblemDoc(status, type, title, description);
+        }
+    }
+
+    record ProblemDoc(int status, String type, String title, String description) {
 
         Map<String, Object> example() {
             Map<String, Object> example = new LinkedHashMap<>();
@@ -210,7 +233,7 @@ public class OpenApiConfig {
             if (status == 400 && type.equals(VALIDATION_ERROR.type())) {
                 Map<String, String> fieldError = new LinkedHashMap<>();
                 fieldError.put("field", "email");
-                fieldError.put("message", "deve ser um endereço de e-mail");
+                fieldError.put("message", "deve ser um endereço de e-mail válido");
                 example.put("errors", List.of(fieldError));
             }
             return example;

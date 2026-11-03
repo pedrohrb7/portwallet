@@ -7,6 +7,6 @@ import org.springframework.http.HttpStatus;
 public class InvalidTokenException extends ApiException {
 
     public InvalidTokenException() {
-        super(HttpStatus.BAD_REQUEST, "invalid-token", "Link inválido ou expirado");
+        super(HttpStatus.BAD_REQUEST, "invalid-token");
     }
 }

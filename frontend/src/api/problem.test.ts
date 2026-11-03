@@ -1,6 +1,7 @@
 import { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { describe, expect, it } from 'vitest'
-import { messageFor, toProblem } from './problem'
+import { i18n } from '../i18n'
+import { problemKey, toProblem } from './problem'
 
 const config = { headers: {} } as InternalAxiosRequestConfig
 
@@ -46,14 +47,25 @@ describe('toProblem', () => {
   })
 })
 
-describe('messageFor', () => {
-  it('translates known types', () => {
-    expect(messageFor({ type: 'insufficient-balance', status: 422 })).toBe('Saldo insuficiente.')
+describe('problemKey', () => {
+  it('picks the message of known types', () => {
+    expect(problemKey({ type: 'insufficient-balance', status: 422 })).toBe(
+      'problem.insufficient-balance',
+    )
+    expect(problemKey({ type: 'network-error', status: 0 })).toBe('problem.network-error')
   })
 
   it('falls back to a generic message for unknown types', () => {
-    expect(messageFor({ type: 'something-new', status: 400 })).toBe(
-      'Algo deu errado. Tente novamente em instantes.',
-    )
+    expect(problemKey({ type: 'something-new', status: 400 })).toBe('problem.fallback')
+    expect(problemKey({ type: 'internal-error', status: 500 })).toBe('problem.fallback')
+    expect(problemKey({ type: 'constructor', status: 400 })).toBe('problem.fallback')
+  })
+
+  it('has a message in every language', () => {
+    const key = problemKey({ type: 'invalid-token', status: 400 })
+    expect(i18n.t(key, { lng: 'pt-BR' })).toBe('Link inválido ou expirado.')
+    expect(i18n.t(key, { lng: 'en' })).toBe('Invalid or expired link.')
+    expect(i18n.t(key, { lng: 'es' })).toBe('Enlace no válido o caducado.')
+    expect(i18n.t(key, { lng: 'fr' })).toBe('Lien invalide ou expiré.')
   })
 })

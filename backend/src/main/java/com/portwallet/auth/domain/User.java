@@ -1,6 +1,7 @@
 package com.portwallet.auth.domain;
 
 import com.portwallet.shared.crypto.EncryptedStringConverter;
+import com.portwallet.shared.i18n.Language;
 import com.portwallet.shared.security.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -49,13 +50,17 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
+    /** Language of the e-mails sent to this user: the one the registration was made in. */
+    @Enumerated(EnumType.STRING)
+    private Language language;
+
     @Column(name = "created_at")
     private Instant createdAt;
 
     protected User() {
     }
 
-    private User(String name, String email, Cpf cpf, String documentHash, Instant now) {
+    private User(String name, String email, Cpf cpf, String documentHash, Language language, Instant now) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.email = email;
@@ -63,26 +68,29 @@ public class User {
         this.documentHash = documentHash;
         this.role = Role.USER;
         this.status = UserStatus.PENDING;
+        this.language = language;
         this.createdAt = now;
     }
 
     /** New pending user, still without a password: it is chosen on activation, by whoever holds the e-mail link. */
-    public static User register(String name, String email, Cpf cpf, String documentHash, Instant now) {
-        return new User(name, email, cpf, documentHash, now);
+    public static User register(String name, String email, Cpf cpf, String documentHash, Language language,
+            Instant now) {
+        return new User(name, email, cpf, documentHash, language, now);
     }
 
     /**
-     * Replaces the data of a registration not yet confirmed with the latest submission, so a typo can be fixed by
-     * registering again. Each submission issues a new link that shows the data it carries, so the owner of the e-mail
+     * Replaces the data of a registration not yet confirmed with the latest submission, language included, so a typo
+     * can be fixed by registering again. Each submission issues a new link that shows the data it carries, so the owner of the e-mail
      * notices if someone else replaced them.
      */
-    public void replacePendingRegistration(String name, Cpf cpf, String documentHash) {
+    public void replacePendingRegistration(String name, Cpf cpf, String documentHash, Language language) {
         if (status != UserStatus.PENDING) {
             throw new IllegalStateException("Only pending registrations can be replaced");
         }
         this.name = name;
         this.document = cpf.digits();
         this.documentHash = documentHash;
+        this.language = language;
     }
 
     /** Sets the password chosen on activation and activates the user. */
@@ -124,6 +132,10 @@ public class User {
 
     public UserStatus status() {
         return status;
+    }
+
+    public Language language() {
+        return language;
     }
 
     public String firstName() {

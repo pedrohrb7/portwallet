@@ -4,7 +4,7 @@
 
 Full-stack portfolio digital wallet: users open an account, deposit, transfer to each other and check their statement, with idempotency, circuit breaker, rate limit and security implemented, visible in the UI and proven by tests.
 
-> Demo environment, no real money. The product targets Brazilian users, so the UI is in Brazilian Portuguese; code and documentation are in English ([ADR 0006](docs/adr/0006-english-docs-portuguese-ui.md)).
+> Demo environment, no real money. The product targets Brazilian users, with Brazilian Portuguese as the default language; the UI, API messages and e-mails are also available in English, Spanish and French, picked from the browser or the language switcher at the bottom of every page ([ADR 0007](docs/adr/0007-multilingual-product.md)). Code and documentation are in English ([ADR 0006](docs/adr/0006-english-docs-portuguese-ui.md)).
 
 The full scope is in the [PRD](PRD.md). Technical specs, implementation plans, user manuals, conventions and architecture decisions live in [`docs/`](docs/README.md).
 

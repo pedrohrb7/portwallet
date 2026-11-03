@@ -6,8 +6,9 @@ Rules that apply to every feature. A spec only repeats a rule from here to make 
 
 - Base `/api/v1`. Plural resources, kebab-case routes, camelCase JSON.
 - Every error response follows Problem Details (RFC 9457), with `Content-Type: application/problem+json`.
-- The `type` field is a stable kebab-case slug (e.g. `insufficient-balance`) that the frontend uses to pick the message. `title` is a short sentence in Portuguese, since it may reach the user; `detail` is optional and never carries sensitive data.
-- Validation errors (400, `type: validation-error`) carry `errors: [{ "field": "amount", "message": "..." }]`.
+- The `type` field is a stable kebab-case slug (e.g. `insufficient-balance`) that the frontend uses to pick the message. `title` is a short sentence in the language of `Accept-Language`, read from `problem.<type>.title` in the message bundles; it depends only on `type` and the language. `detail` is optional and never carries sensitive data.
+- Validation errors (400, `type: validation-error`) carry `errors: [{ "field": "amount", "message": "..." }]`, with `message` in the language of the request.
+- A new `type` gets a title in all four bundles (`messages*.properties`) and a message in all four frontend catalogs.
 - No response carries a stack trace, class name or SQL.
 
 ### `type` catalog
@@ -42,7 +43,7 @@ Later phases add types (`idempotency-*`, `totp-*`, `rate-limited`, `fraud-check-
 - In the database, `DECIMAL(19,2)`.
 - In JSON, a **string** with two decimal places (`"150.00"`), in requests and responses. Requests also accept a number, converted without loss. Strings avoid the precision loss of the JavaScript `number` ([ADR 0004](adr/0004-money-as-string-in-json.md)).
 - Response DTOs use the `Money` type; request DTOs may use `BigDecimal` with `@Digits(integer = 17, fraction = 2)` so validation points at the field.
-- In the frontend, values stay as strings until formatted with `Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })`. No money arithmetic happens in the client.
+- In the frontend, values stay as strings until formatted with `formatBRL(value, language)`: always BRL (`R$`), with the separators of the interface language. No money arithmetic happens in the client.
 
 ## Dates and time zone
 
@@ -71,13 +72,16 @@ Later phases add types (`idempotency-*`, `totp-*`, `rate-limited`, `fraud-check-
 - Routes in `src/routes`, features in `src/features/<name>`, shared components in `src/components`, HTTP client in `src/api`.
 - Server state with TanStack Query; forms with React Hook Form + Zod; HTTP with Axios.
 - Access token only in memory, never in `localStorage` or `sessionStorage`.
-- API errors mapped by the Problem Details `type` to messages in Portuguese.
+- No user-facing text in components: every text is a key in the catalogs of `src/i18n/locales` (pt-BR is the source; the other catalogs are typed against it), rendered with `t()` or `<Trans>`. Zod schemas use keys as messages.
+- API errors mapped by the Problem Details `type` to messages in the catalogs (`problemKey`).
 - Test selectors by ARIA role and `data-testid`. No `waitForTimeout` in E2E tests.
 - Build flags (`VITE_*`) are public, since they end up in the bundle. The dev and E2E values live in `frontend/.env.development`, which is versioned (CI and fresh clones depend on it). Never put secrets there; personal overrides go in `.env*.local`, which stays ignored.
 
 ## Language
 
-- The UI, API error titles, e-mails and OpenAPI descriptions are in Brazilian Portuguese, the language of the product's users.
+- The UI, API error titles and messages and the e-mails exist in Brazilian Portuguese (default and fallback), English, Spanish and French ([ADR 0007](adr/0007-multilingual-product.md), [nfr-i18n](features/nfr-i18n/spec.md)). The frontend sends its language in `Accept-Language`; e-mails use the language saved on the user.
+- Backend messages with arguments go through `MessageFormat`: use the typographic apostrophe (`’`), never `'`. French uses a no-break space before `:`, `?`, `!` and `;`.
+- OpenAPI descriptions stay in Brazilian Portuguese.
 - Code, test names, commits and all documentation are in English ([ADR 0006](adr/0006-english-docs-portuguese-ui.md)).
 - The root README exists in English (`README.md`) and Portuguese (`README.pt-BR.md`); both change together.
 

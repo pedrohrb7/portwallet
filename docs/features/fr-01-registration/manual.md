@@ -2,7 +2,7 @@
 
 This manual shows how to create a PortWallet account and activate it through the link sent by e-mail. It describes the behavior in the [FR-01 spec](spec.md) from the point of view of someone using the system.
 
-The PortWallet interface is in Brazilian Portuguese. Buttons, fields and messages are quoted here exactly as they appear on screen, followed by a translation.
+PortWallet opens in your browser's language when it is Portuguese, English, Spanish or French, and in Brazilian Portuguese otherwise. To change it, use the **Idioma** (Language) selector at the bottom of any page; the choice is remembered on that browser. The e-mails come in the language you registered in. Buttons, fields and messages are quoted here in Brazilian Portuguese, exactly as they appear on screen, followed by a translation.
 
 > **Demo environment.** PortWallet moves no real money. Use fictitious data: any name, a made-up e-mail and a valid fictitious CPF (you can generate one with any CPF generator for testing).
 

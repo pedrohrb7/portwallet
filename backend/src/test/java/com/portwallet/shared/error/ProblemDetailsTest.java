@@ -152,7 +152,7 @@ class ProblemDetailsTest {
 
     static class SampleBusinessException extends ApiException {
         SampleBusinessException() {
-            super(HttpStatus.UNPROCESSABLE_ENTITY, "insufficient-balance", "Saldo insuficiente");
+            super(HttpStatus.UNPROCESSABLE_ENTITY, "insufficient-balance");
         }
 
         @Override

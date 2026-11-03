@@ -2,6 +2,7 @@ package com.portwallet.shared.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import com.portwallet.shared.error.ProblemTitles;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -29,6 +30,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
+import org.springframework.web.servlet.LocaleResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration(proxyBeanMethods = false)
@@ -37,8 +39,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class SecurityConfig implements WebMvcConfigurer {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper) throws Exception {
-        ProblemSecurityHandlers problemHandlers = new ProblemSecurityHandlers(objectMapper);
+    SecurityFilterChain securityFilterChain(HttpSecurity http, ObjectMapper objectMapper, ProblemTitles titles,
+            LocaleResolver localeResolver) throws Exception {
+        ProblemSecurityHandlers problemHandlers = new ProblemSecurityHandlers(objectMapper, titles, localeResolver);
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)

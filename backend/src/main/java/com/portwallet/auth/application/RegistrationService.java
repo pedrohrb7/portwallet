@@ -80,9 +80,9 @@ public class RegistrationService {
         if (sameEmail.isPresent()) {
             // Latest submission wins; its new link shows these data before activation (see ConfirmationService).
             user = sameEmail.get();
-            user.replacePendingRegistration(command.name(), command.cpf(), documentHash);
+            user.replacePendingRegistration(command.name(), command.cpf(), documentHash, command.language());
         } else {
-            user = User.register(command.name(), command.email(), command.cpf(), documentHash, now);
+            user = User.register(command.name(), command.email(), command.cpf(), documentHash, command.language(), now);
             users.save(user);
         }
         users.flush();

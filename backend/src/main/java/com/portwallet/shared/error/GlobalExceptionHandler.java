@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.TypeMismatchException;
+import org.springframework.context.MessageSource;
 import org.springframework.context.MessageSourceResolvable;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
@@ -31,6 +33,12 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
+    private final MessageSource messages;
+
+    GlobalExceptionHandler(MessageSource messages) {
+        this.messages = messages;
+    }
 
     @ExceptionHandler(ApiException.class)
     ResponseEntity<ProblemDetail> handleApiException(ApiException ex) {
@@ -77,8 +85,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
             HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         List<FieldError> errors = ex.getCause() instanceof JsonMappingException mapping && !mapping.getPath().isEmpty()
-                ? List.of(new FieldError(jsonPath(mapping), "valor inválido"))
-                : List.of(new FieldError("body", "JSON malformado"));
+                ? List.of(new FieldError(jsonPath(mapping), message("validation.invalid-value")))
+                : List.of(new FieldError("body", message("validation.malformed-json")));
         return ResponseEntity.badRequest().body(Problems.validation(errors));
     }
 
@@ -86,7 +94,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleTypeMismatch(
             TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
         String field = ex.getPropertyName() != null ? ex.getPropertyName() : "parameter";
-        return ResponseEntity.badRequest().body(Problems.validation(List.of(new FieldError(field, "valor inválido"))));
+        return ResponseEntity.badRequest().body(Problems.validation(List.of(new FieldError(field, message("validation.invalid-value")))));
     }
 
     @Override
@@ -94,7 +102,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status,
             WebRequest request) {
         return ResponseEntity.badRequest()
-                .body(Problems.validation(List.of(new FieldError(ex.getParameterName(), "é obrigatório"))));
+                .body(Problems.validation(List.of(new FieldError(ex.getParameterName(), message("validation.required")))));
     }
 
     @Override
@@ -103,7 +111,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             HttpStatusCode status, WebRequest request) {
         if (ex instanceof MissingRequestHeaderException missingHeader) {
             return ResponseEntity.badRequest()
-                    .body(Problems.validation(List.of(new FieldError(missingHeader.getHeaderName(), "é obrigatório"))));
+                    .body(Problems.validation(List.of(new FieldError(missingHeader.getHeaderName(), message("validation.required")))));
         }
         return super.handleServletRequestBindingException(ex, headers, status, request);
     }
@@ -123,8 +131,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return name != null ? name : "parameter";
     }
 
-    private static String message(MessageSourceResolvable error) {
-        return error.getDefaultMessage() != null ? error.getDefaultMessage() : "valor inválido";
+    /** Bean Validation messages arrive already interpolated in the language of the request. */
+    private String message(MessageSourceResolvable error) {
+        return error.getDefaultMessage() != null ? error.getDefaultMessage() : message("validation.invalid-value");
+    }
+
+    /** A field message in the language of the request, set by DispatcherServlet from the LocaleResolver. */
+    private String message(String key) {
+        return messages.getMessage(key, null, LocaleContextHolder.getLocale());
     }
 
     private static String jsonPath(JsonMappingException ex) {

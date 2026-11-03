@@ -2,6 +2,7 @@ import { act, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { authClient } from '../../api/client'
+import { i18n } from '../../i18n'
 import { mockAdapter } from '../../test/axiosMock'
 import { renderRoutes } from '../../test/renderRoutes'
 import { ConfirmPage } from './ConfirmPage'
@@ -72,6 +73,22 @@ describe('ConfirmPage', () => {
       '/register',
     )
     expect(requests).toEqual([{ url: '/auth/confirm/summary', body: { token: 'good-token' } }])
+  })
+
+  it('shows the summary in the chosen language, links inside the text included', async () => {
+    await i18n.changeLanguage('en')
+    renderAt('#token=good-token')
+
+    const summary = await screen.findByTestId('confirm-summary')
+    expect(within(summary).getByRole('heading', { name: 'Are these your details?' })).toBeVisible()
+    expect(summary).toHaveTextContent(
+      'Not yours? Do not continue: register again. You will receive a new link, and this one will stop working.',
+    )
+    expect(within(summary).getByRole('link', { name: 'register again' })).toHaveAttribute(
+      'href',
+      '/register',
+    )
+    expect(screen.getByLabelText('Create a password')).toBeInTheDocument()
   })
 
   it('activates the account with the token and the new password', async () => {

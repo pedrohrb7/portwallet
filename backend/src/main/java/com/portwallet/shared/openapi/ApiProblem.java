@@ -9,7 +9,8 @@ import java.lang.annotation.Target;
 
 /**
  * Documents a business error an endpoint can return, as Problem Details with a stable {@code type}. Generic errors
- * (validation, authentication, unexpected) are added by {@link OpenApiConfig} and do not need to be declared.
+ * (validation, authentication, unexpected) are added by {@link OpenApiConfig} and do not need to be declared. The
+ * documented title is read from the {@code problem.<type>.title} message, so it is always the one the API sends.
  */
 @Documented
 @Target(ElementType.METHOD)
@@ -21,9 +22,6 @@ public @interface ApiProblem {
 
     /** The {@code type} of the catalog in docs/conventions.md. */
     String type();
-
-    /** The {@code title} the API sends for this type. */
-    String title();
 
     /** When it happens, for the reader of the docs. */
     String description();

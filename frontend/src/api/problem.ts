@@ -1,4 +1,5 @@
 import { isAxiosError } from 'axios'
+import { ptBR, type Catalog } from '../i18n/locales/pt-BR'
 
 export type FieldError = { field: string; message: string }
 
@@ -14,26 +15,12 @@ export type Problem = {
 
 const NETWORK_ERROR = 'network-error'
 
-const messages: Record<string, string> = {
-  'validation-error': 'Confira os dados informados.',
-  'invalid-cursor': 'Não foi possível carregar mais itens. Recarregue a página.',
-  'invalid-token': 'Link inválido ou expirado.',
-  unauthorized: 'Sua sessão expirou. Entre novamente.',
-  'invalid-credentials': 'E-mail ou senha inválidos.',
-  'invalid-refresh-token': 'Sua sessão expirou. Entre novamente.',
-  forbidden: 'Você não tem permissão para acessar isto.',
-  'account-blocked': 'Sua conta está bloqueada para movimentações.',
-  'not-found': 'Não encontrado.',
-  'recipient-not-found': 'Destinatário não encontrado ou indisponível.',
-  'concurrency-conflict': 'Muitas operações ao mesmo tempo. Tente novamente.',
-  'insufficient-balance': 'Saldo insuficiente.',
-  'daily-limit-exceeded': 'Valor acima do limite diário disponível.',
-  'self-transfer': 'Não é possível transferir para a própria conta.',
-  'recipient-unavailable': 'Destinatário indisponível. Busque novamente.',
-  [NETWORK_ERROR]: 'Sem conexão com o servidor. Verifique sua internet e tente novamente.',
-}
+type MessageType = Exclude<keyof Catalog['problem'], 'fallback'>
+export type ProblemKey = `problem.${keyof Catalog['problem']}`
 
-const fallbackMessage = 'Algo deu errado. Tente novamente em instantes.'
+function hasMessage(type: string): type is MessageType {
+  return type !== 'fallback' && Object.hasOwn(ptBR.problem, type)
+}
 
 function isProblem(value: unknown): value is Problem {
   return (
@@ -61,6 +48,7 @@ export function toProblem(error: unknown): Problem {
   return { type: 'internal-error', status: 0 }
 }
 
-export function messageFor(problem: Problem): string {
-  return messages[problem.type] ?? fallbackMessage
+/** Translation key of the message shown for a problem, picked by its `type`; a generic one for unknown types. */
+export function problemKey(problem: Problem): ProblemKey {
+  return hasMessage(problem.type) ? `problem.${problem.type}` : 'problem.fallback'
 }

@@ -23,7 +23,7 @@ public @interface MaxUtf8Bytes {
 
     int value();
 
-    String message() default "é longo demais";
+    String message() default "{validation.too-long}";
 
     Class<?>[] groups() default {};
 

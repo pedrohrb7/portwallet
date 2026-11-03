@@ -51,7 +51,7 @@ portwallet:
       # Demo inbox (/mock/inbox) where simulated e-mails land. Only in dev, e2e and demo.
       enabled: false
 
-# API docs exist only in the dev and demo profiles (see docs/features/rnf-documentacao-api).
+# API docs exist only in the dev and demo profiles (see docs/features/nfr-api-docs).
 springdoc:
   api-docs:
     enabled: false

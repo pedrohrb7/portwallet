@@ -180,7 +180,7 @@ public class OpenApiConfig {
         fieldError.addProperty("message", new StringSchema().description("O que está errado"));
 
         ObjectSchema problem = new ObjectSchema();
-        problem.description("Problem Details (RFC 9457). O catálogo de `type` está em docs/convencoes.md.");
+        problem.description("Problem Details (RFC 9457). O catálogo de `type` está em docs/conventions.md.");
         problem.addProperty("type", new StringSchema().description("Identificador estável do erro"));
         problem.addProperty("title", new StringSchema().description("Resumo legível do erro, em português"));
         problem.addProperty("status", new IntegerSchema().description("Status HTTP"));

@@ -1,86 +1,86 @@
-# Spec: <ID> <Nome da feature>
+# Spec: <ID> <Feature name>
 
-- **Status:** Rascunho
-- **Fase:** <N>
-- **PRD:** <RF-NN, seção do PRD>
-- **Depende de:** <features, ou "nenhuma">
-- **Plano:** [plan.md](plan.md)
+- **Status:** Draft
+- **Phase:** <N>
+- **PRD:** <FR-NN, PRD section>
+- **Depends on:** <features, or "none">
+- **Plan:** [plan.md](plan.md)
 
-## Objetivo
+## Goal
 
-<Uma ou duas frases: o que a feature entrega e para quem.>
+<One or two sentences: what the feature delivers and for whom.>
 
-## Escopo
+## Scope
 
-**Inclui**
+**Includes**
 
 - <...>
 
-**Fica para depois**
+**Later**
 
-- <item>: <fase ou feature onde entra>
+- <item>: <phase or feature where it comes in>
 
-## Comportamento
+## Behavior
 
-<Regras de negócio numeradas, do caminho feliz às bordas. Cada regra deve poder virar um teste.>
+<Numbered business rules, from the happy path to the edges. Each rule must be able to become a test.>
 
 1. <...>
 
 ## API
 
-### `<MÉTODO> /api/v1/<rota>`
+### `<METHOD> /api/v1/<route>`
 
-- **Acesso:** <Público | USER | ADMIN>
-- **Headers:** <obrigatórios>
+- **Access:** <Public | USER | ADMIN>
+- **Headers:** <required>
 
-Requisição:
-
-```json
-{}
-```
-
-Resposta `<status>`:
+Request:
 
 ```json
 {}
 ```
 
-| Status | `type` | Quando |
+Response `<status>`:
+
+```json
+{}
+```
+
+| Status | `type` | When |
 | --- | --- | --- |
 | <...> | <...> | <...> |
 
-## Modelo de dados
+## Data model
 
-<Migrations novas (`V<N>__<nome>.sql`), tabelas, colunas, constraints e índices.>
+<New migrations (`V<N>__<name>.sql`), tables, columns, constraints and indexes.>
 
 ## Backend
 
-<Pacotes, classes principais e responsabilidades.>
+<Packages, main classes and responsibilities.>
 
 ## Frontend
 
-<Rotas, componentes, estados de tela e `data-testid`.>
+<Routes, components, screen states and `data-testid`.>
 
-## Segurança
+## Security
 
-<Autorização, checagem de propriedade, dados sensíveis, o que nunca vai para log.>
+<Authorization, ownership checks, sensitive data, what never goes to the log.>
 
-## Testes
+## Tests
 
-| Camada | Cenário |
+| Layer | Scenario |
 | --- | --- |
-| Unitário | <...> |
-| Integração | <...> |
+| Unit | <...> |
+| Integration | <...> |
 | E2E | <...> |
 
-## Critérios de aceite
+## Acceptance criteria
 
 - [ ] <...>
 
-## Decisões
+## Decisions
 
-<Escolhas feitas nesta spec e o motivo. As de longo prazo viram ADR ao concluir.>
+<Choices made in this spec and why. Long-lived ones become ADRs when the feature is done.>
 
-## Questões em aberto
+## Open questions
 
 - <...>

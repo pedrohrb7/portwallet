@@ -1,54 +1,56 @@
 # PortWallet
 
-Carteira digital fullstack de portfólio: usuários abrem conta, depositam, transferem entre si e consultam extrato, com idempotência, circuit breaker, rate limit e segurança implementados, visíveis na interface e provados por testes.
+**English** · [Português](README.pt-BR.md)
 
-> Ambiente de demonstração, sem dinheiro real.
+Full-stack portfolio digital wallet: users open an account, deposit, transfer to each other and check their statement, with idempotency, circuit breaker, rate limit and security implemented, visible in the UI and proven by tests.
 
-O escopo completo está no [PRD](PRD.md). Specs técnicas, planos de implementação, convenções e decisões de arquitetura ficam em [`docs/`](docs/README.md).
+> Demo environment, no real money. The product targets Brazilian users, so the UI is in Brazilian Portuguese; code and documentation are in English ([ADR 0006](docs/adr/0006-english-docs-portuguese-ui.md)).
+
+The full scope is in the [PRD](PRD.md). Technical specs, implementation plans, user manuals, conventions and architecture decisions live in [`docs/`](docs/README.md).
 
 ## Status
 
-| Fase | Entrega | Status |
+| Phase | Delivery | Status |
 | --- | --- | --- |
-| 1. Fundação | Monorepo, Maven, Vite, Flyway, Docker Compose, CI, health e E2E trivial | Concluída |
-| 2. Núcleo da carteira | Cadastro, login, depósito, transferência, extrato, ledger | Em andamento ([progresso](docs/README.md#features)) |
-| 3. Idempotência | `@Idempotent`, replay, limpeza | Pendente |
-| 4. Resiliência | Circuit breaker, bulkhead, outbox, painel admin | Pendente |
-| 5. Rate limit e segurança base | Bucket4j, refresh rotativo, CSRF, auditoria | Pendente |
-| 6. Segurança avançada e performance | TOTP, criptografia, k6, Lighthouse | Pendente |
-| 7. Escala horizontal | H2 servidor, Redis, ShedLock, Nginx com 3 instâncias | Pendente |
-| 8. Vitrine | GIFs, resultados, deploy público | Pendente |
+| 1. Foundation | Monorepo, Maven, Vite, Flyway, Docker Compose, CI, health and a trivial E2E | Done |
+| 2. Wallet core | Registration, login, deposit, transfer, statement, ledger | In progress ([progress](docs/README.md#features)) |
+| 3. Idempotency | `@Idempotent`, replay, cleanup | Pending |
+| 4. Resilience | Circuit breaker, bulkhead, outbox, admin dashboard | Pending |
+| 5. Rate limit and base security | Bucket4j, rotating refresh, CSRF, auditing | Pending |
+| 6. Advanced security and performance | TOTP, encryption, k6, Lighthouse | Pending |
+| 7. Horizontal scale | H2 server, Redis, ShedLock, Nginx with 3 instances | Pending |
+| 8. Showcase | GIFs, results, public deploy | Pending |
 
-## Rodando com Docker (2 comandos)
+## Running with Docker (2 commands)
 
 ```sh
-git clone <url-do-repositorio> portwallet && cd portwallet
+git clone <repository-url> portwallet && cd portwallet
 docker compose up --build
 ```
 
-Acesse <http://localhost:3000>. A porta pode ser trocada com `WEB_PORT=8000 docker compose up --build`.
+Open <http://localhost:3000>. The port can be changed with `WEB_PORT=8000 docker compose up --build`.
 
-O compose sobe a API no perfil `demo`. Nesse perfil, os e-mails (como o link de ativação da conta) chegam na **caixa de entrada demo**, em <http://localhost:3000/inbox>.
+Compose starts the API in the `demo` profile. In this profile, e-mails (such as the account activation link) arrive in the **demo inbox**, at <http://localhost:3000/inbox>. The [registration manual](docs/features/fr-01-registration/manual.md) walks through creating and activating an account.
 
-### Variáveis de ambiente
+### Environment variables
 
-O compose já passa valores de demonstração para todas elas. Fora de uma demo local, defina valores próprios: sem eles, a API só sobe nos perfis `dev` e `e2e`, que têm valores de desenvolvimento.
+Compose already passes demo values for all of them. Outside a local demo, set your own values: without them, the API only starts in the `dev` and `e2e` profiles, which have development values.
 
-| Variável | Uso |
+| Variable | Use |
 | --- | --- |
-| `JWT_SECRET` | Segredo do access token (HS256), com no mínimo 32 bytes |
-| `PORTWALLET_CRYPTO_ENCRYPTION_KEY` | Chave AES-256-GCM dos campos cifrados (CPF): 32 bytes em Base64 |
-| `PORTWALLET_CRYPTO_BLIND_INDEX_KEY` | Chave HMAC-SHA256 do blind index do CPF: 32 bytes em Base64, diferente da anterior |
-| `APP_BASE_URL` | Endereço público do frontend, usado nos links enviados por e-mail |
+| `JWT_SECRET` | Access token secret (HS256), at least 32 bytes |
+| `PORTWALLET_CRYPTO_ENCRYPTION_KEY` | AES-256-GCM key for the encrypted fields (CPF): 32 bytes in Base64 |
+| `PORTWALLET_CRYPTO_BLIND_INDEX_KEY` | HMAC-SHA256 key for the CPF blind index: 32 bytes in Base64, different from the previous one |
+| `APP_BASE_URL` | Public address of the frontend, used in the links sent by e-mail |
 
-Para gerar uma chave: `openssl rand -base64 32`.
+To generate a key: `openssl rand -base64 32`.
 
-## Versões fixadas
+## Pinned versions
 
-| Ferramenta | Versão |
+| Tool | Version |
 | --- | --- |
 | Java | 21 (Temurin 21.0.13) |
-| Maven | 3.9.16 (via Maven Wrapper) |
+| Maven | 3.9.16 (through the Maven Wrapper) |
 | Spring Boot | 3.5.16 |
 | Node.js | 24 (`frontend/.nvmrc`) |
 | React | 19 |
@@ -58,89 +60,93 @@ Para gerar uma chave: `openssl rand -base64 32`.
 | Vitest | 5 |
 | Playwright | 1.64 |
 
-## Desenvolvimento local
+## Local development
 
-### Pré-requisitos
+### Prerequisites
 
-O JDK e o Maven estão fixados no [`.sdkmanrc`](.sdkmanrc). Com o [SDKMAN](https://sdkman.io) instalado:
+The JDK and Maven are pinned in [`.sdkmanrc`](.sdkmanrc). With [SDKMAN](https://sdkman.io) installed:
 
 ```sh
-sdk env install   # instala as versões do .sdkmanrc
-sdk env           # ativa as versões no shell atual
+sdk env install   # installs the versions from .sdkmanrc
+sdk env           # activates the versions in the current shell
 ```
 
-Node.js 24 também é necessário para o frontend.
+Node.js 24 is also needed for the frontend.
 
 ### Backend
 
 ```sh
 cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # API em http://localhost:8080
-./mvnw verify                                           # testes + cobertura (target/site/jacoco)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # API at http://localhost:8080
+./mvnw verify                                           # tests + coverage (target/site/jacoco)
 ```
 
-No perfil `dev`, o console do H2 fica em <http://localhost:8080/h2-console> (JDBC URL `jdbc:h2:mem:portwallet`, usuário `sa`, sem senha). Os e-mails simulados ficam na caixa de entrada demo, em <http://localhost:5173/inbox> com o frontend rodando.
+In the `dev` profile, the H2 console is at <http://localhost:8080/h2-console> (JDBC URL `jdbc:h2:mem:portwallet`, user `sa`, no password). Simulated e-mails are in the demo inbox, at <http://localhost:5173/inbox> with the frontend running.
 
 ### Frontend
 
 ```sh
 cd frontend
 npm install
-npm run dev         # http://localhost:5173, com proxy de /api para o backend
-npm test            # testes unitários (Vitest)
+npm run dev         # http://localhost:5173, proxying /api to the backend
+npm test            # unit tests (Vitest)
 npm run lint        # oxlint
 npm run typecheck   # tsc
 npm run format      # Prettier
 ```
 
-### Testes E2E
+### E2E tests
 
 ```sh
 cd frontend
-npx playwright install chromium firefox   # apenas na primeira vez
+npx playwright install chromium firefox   # first time only
 npm run e2e
 ```
 
-O Playwright sobe o backend no perfil `e2e` e o servidor do Vite sozinho; se eles já estiverem rodando, são reaproveitados. O relatório fica em `frontend/playwright-report`.
+Playwright starts the backend in the `e2e` profile and the Vite server on its own; if they are already running, they are reused. The report goes to `frontend/playwright-report`.
 
-## Estrutura
+## Structure
 
 ```text
 portwallet/
-├── backend/            Spring Boot (Maven), pacotes por funcionalidade
+├── backend/            Spring Boot (Maven), feature packages
 ├── frontend/           React + Vite + Tailwind
-│   └── e2e/            testes Playwright
-├── docs/               specs, planos, convenções e ADRs
-├── .github/workflows/  pipeline de CI
+│   └── e2e/            Playwright tests
+├── docs/               specs, plans, manuals, conventions and ADRs
+├── .github/workflows/  CI pipeline
 └── docker-compose.yml
 ```
 
-## Documentação da API
+## API documentation
 
-O Swagger UI fica disponível nos perfis `dev` e `demo`, e não existe nos demais:
+Swagger UI is available in the `dev` and `demo` profiles, and does not exist in the others:
 
-- Com Docker: <http://localhost:3000/swagger-ui>
-- Com o backend local no perfil `dev`: <http://localhost:8080/swagger-ui>
+- With Docker: <http://localhost:3000/swagger-ui>
+- With the local backend in the `dev` profile: <http://localhost:8080/swagger-ui>
 
-O documento OpenAPI 3.1 fica em `/v3/api-docs`. Para chamar endpoints protegidos, faça login e cole o `accessToken` em "Authorize".
+The OpenAPI 3.1 document is at `/v3/api-docs`. To call protected endpoints, sign in and paste the `accessToken` into "Authorize".
 
 ## Endpoints
 
-| Endpoint | Descrição |
+| Endpoint | Description |
 | --- | --- |
-| `GET /actuator/health` | Estado geral da API, sem detalhes dos componentes |
-| `GET /actuator/health/liveness` | Probe de liveness |
-| `GET /actuator/health/readiness` | Probe de readiness, usada pelo healthcheck do Docker |
+| `POST /api/v1/auth/register` | Registration (name, e-mail, CPF); always the same 202 response |
+| `POST /api/v1/auth/confirm/summary` | Masked data of the registration a confirmation link belongs to |
+| `POST /api/v1/auth/confirm` | Activates the account, setting the password, and opens the wallet |
+| `GET /mock/inbox?to=<e-mail>` | Demo inbox (`dev`, `e2e` and `demo` profiles only) |
+| `GET /actuator/health` | Overall API status, without component details |
+| `GET /actuator/health/liveness` | Liveness probe |
+| `GET /actuator/health/readiness` | Readiness probe, used by the Docker healthcheck |
 
 ## CI
 
-O GitHub Actions roda a cada push no `main`. Um primeiro job detecta o que mudou, e cada verificação só roda quando o código que ela cobre mudou. Mudanças só em documentação (`docs/`, arquivos `.md`) não disparam nenhuma verificação.
+GitHub Actions runs on every push to `main`. A first job detects what changed, and each check only runs when the code it covers changed. Documentation-only changes (`docs/`, `.md` files) trigger no check.
 
-| Job | O que faz | Roda quando muda |
+| Job | What it does | Runs when this changes |
 | --- | --- | --- |
-| **Backend** | `./mvnw verify` (testes e relatório de cobertura JaCoCo) | `backend/` |
-| **Frontend** | Lint, formatação, tipos, testes unitários e build | `frontend/` |
-| **E2E** | Playwright em Chromium e Firefox contra o backend; o relatório HTML é publicado como artefato | `backend/` ou `frontend/` |
-| **Docker** | Sobe o `docker compose` e verifica o health pela borda do Nginx | `backend/`, `frontend/` ou `docker-compose.yml` |
+| **Backend** | `./mvnw verify` (tests and JaCoCo coverage report) | `backend/` |
+| **Frontend** | Lint, formatting, types, unit tests and build | `frontend/` |
+| **E2E** | Playwright in Chromium and Firefox against the backend; the HTML report is published as an artifact | `backend/` or `frontend/` |
+| **Docker** | Starts `docker compose` and checks health through the Nginx edge | `backend/`, `frontend/` or `docker-compose.yml` |
 
-Qualquer mudança no próprio workflow (`.github/workflows/ci.yml`) roda todos os jobs. Um job pulado aparece como "skipped", e o E2E roda mesmo que o backend ou o frontend tenham sido pulados, desde que nenhum job executado tenha falhado.
+Any change to the workflow itself (`.github/workflows/ci.yml`) runs every job. A skipped job shows as "skipped", and E2E runs even if the backend or frontend jobs were skipped, as long as no job that ran has failed.

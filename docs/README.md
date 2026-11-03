@@ -1,77 +1,82 @@
-# Documentação
+# Documentation
 
-Toda mudança relevante no PortWallet nasce de uma feature documentada aqui. O [PRD](../PRD.md) diz **o que** construir; as specs dizem **como**; os planos dizem **em que ordem**; os ADRs registram **por que** uma decisão foi tomada.
+Every relevant change to PortWallet starts as a feature documented here. The [PRD](../PRD.md) says **what** to build; specs say **how**; plans say **in what order**; ADRs record **why** a decision was made.
 
 ```text
 docs/
-├── README.md           este índice
-├── convencoes.md       regras transversais (API, dinheiro, erros, código)
-├── _templates/         modelos de spec e plano
-├── adr/                decisões de arquitetura (imutáveis depois de aceitas)
+├── README.md           this index
+├── conventions.md      cross-cutting rules (API, money, errors, code)
+├── _templates/         spec and plan templates
+├── adr/                architecture decisions (immutable once accepted)
 ├── backlog/
-│   └── refactor/       refactors planejados (padrão da skill project-docs), com índice próprio
+│   └── refactor/       planned refactors (project-docs skill layout), with their own index
 └── features/
     └── <id>-<slug>/
-        ├── spec.md     especificação técnica
-        └── plan.md     plano de implementação
+        ├── spec.md     technical specification
+        ├── plan.md     implementation plan
+        └── manual.md   user manual, for people using the system (features with a UI)
 ```
 
-Refactors planejados ficam em [`backlog/refactor/`](backlog/refactor/README.md), um arquivo datado por refactor, criado a partir do `TEMPLATE.md` da pasta.
+Planned refactors live in [`backlog/refactor/`](backlog/refactor/README.md), one dated file per refactor, created from that folder's `TEMPLATE.md`.
 
-## Fluxo de trabalho
+All documentation is written in English; the product UI is in Brazilian Portuguese ([ADR 0006](adr/0006-english-docs-portuguese-ui.md)). UI texts quoted in the docs (labels, messages, e-mails) stay in Portuguese, exactly as the user sees them.
 
-1. **Spec.** Copie `_templates/spec.md` para `features/<id>-<slug>/spec.md` e descreva o comportamento, o contrato da API, o modelo de dados e os testes que provam a feature. Status `Rascunho`.
-2. **Revisão.** Dúvidas ficam na seção "Questões em aberto". Quando não houver mais nenhuma, a spec passa para `Aprovada`.
-3. **Plano.** Copie `_templates/plan.md` e quebre a spec em passos pequenos e verificáveis, cada um com os arquivos afetados e o teste que o valida.
-4. **Implementação.** Marque os passos do plano conforme forem concluídos. Se a implementação mudar uma decisão, atualize a spec no mesmo trabalho; spec desatualizada é bug.
-5. **Encerramento.** Com os critérios de aceite atendidos, spec e plano passam para `Concluída`, e as decisões de longo prazo viram ADR.
+## Workflow
+
+1. **Spec.** Copy `_templates/spec.md` to `features/<id>-<slug>/spec.md` and describe the behavior, the API contract, the data model and the tests that prove the feature. Status `Draft`.
+2. **Review.** Doubts go in the "Open questions" section. When there are none left, the spec moves to `Approved`.
+3. **Plan.** Copy `_templates/plan.md` and break the spec into small, verifiable steps, each with the files it touches and the test that validates it.
+4. **Implementation.** Check off plan steps as they are done. If the implementation changes a decision, update the spec in the same piece of work; an outdated spec is a bug.
+5. **Manual.** Features with a UI get a `manual.md` with the step-by-step usage, the messages the person may see and what to do about each one. The manual describes the behavior in the spec and changes along with it.
+6. **Closing.** Once the acceptance criteria are met, spec and plan move to `Done`, and long-lived decisions become ADRs.
 
 ### Status
 
-| Status | Significado |
+| Status | Meaning |
 | --- | --- |
-| Rascunho | Em escrita ou com questões em aberto |
-| Aprovada | Pronta para implementar |
-| Em implementação | Plano em execução |
-| Concluída | Critérios de aceite atendidos e CI verde |
-| Substituída | Trocada por outra feature, indicada no topo do documento |
+| Draft | Being written or with open questions |
+| Approved | Ready to implement |
+| In progress | Plan being executed |
+| Done | Acceptance criteria met and CI green |
+| Superseded | Replaced by another feature, named at the top of the document |
 
-### Nomes
+### Names
 
-- `rf-NN-<slug>`: requisito funcional do PRD (ex.: `rf-05-transferencia`).
-- `rnf-<slug>`: requisito não funcional ou trabalho transversal (ex.: `rnf-ledger-concorrencia`).
-- Slugs em português, minúsculos, em kebab-case.
+- `fr-NN-<slug>`: functional requirement from the PRD (e.g. `fr-05-transfer`).
+- `nfr-<slug>`: non-functional requirement or cross-cutting work (e.g. `nfr-ledger-concurrency`).
+- Slugs in English, lower case, kebab-case.
 
-### Spec ou ADR?
+### Spec or ADR?
 
-A spec descreve uma feature e evolui com ela. O ADR registra uma decisão que vale para além de uma feature (escolha de biblioteca, formato de dados, trade-off de arquitetura) e não é editado depois de aceito. Uma spec pode citar ADRs; quando ela toma uma decisão desse porte, a decisão vira ADR ao final.
+A spec describes a feature and evolves with it. An ADR records a decision that reaches beyond one feature (library choice, data format, architectural trade-off) and is not edited once accepted. A spec may cite ADRs; when it makes a decision of that size, the decision becomes an ADR at the end.
 
 ## Features
 
-| Fase | Feature | Spec | Plano | Status |
+| Phase | Feature | Spec | Plan | Status |
 | --- | --- | --- | --- | --- |
-| 1 | Fundação | [spec](features/rnf-fundacao/spec.md) | [plano](features/rnf-fundacao/plan.md) | Concluída |
-| 2 | Base da aplicação (erros, segurança, shell do frontend) | [spec](features/rnf-base-aplicacao/spec.md) | [plano](features/rnf-base-aplicacao/plan.md) | Concluída |
-| 2 | Documentação da API (OpenAPI e Swagger UI) | [spec](features/rnf-documentacao-api/spec.md) | [plano](features/rnf-documentacao-api/plan.md) | Concluída |
-| 2 | RF-01 Cadastro e confirmação | [spec](features/rf-01-cadastro/spec.md) | [plano](features/rf-01-cadastro/plan.md) | Concluída |
-| 2 | RF-02 Login e refresh | [spec](features/rf-02-login/spec.md) | [plano](features/rf-02-login/plan.md) | Aprovada |
-| 2 | RF-03 Logout | [spec](features/rf-03-logout/spec.md) | [plano](features/rf-03-logout/plan.md) | Aprovada |
-| 2 | Ledger e concorrência | [spec](features/rnf-ledger-concorrencia/spec.md) | [plano](features/rnf-ledger-concorrencia/plan.md) | Aprovada |
-| 2 | RF-08 Saldo | [spec](features/rf-08-saldo/spec.md) | [plano](features/rf-08-saldo/plan.md) | Aprovada |
-| 2 | RF-04 Depósito simulado | [spec](features/rf-04-deposito/spec.md) | [plano](features/rf-04-deposito/plan.md) | Aprovada |
-| 2 | RF-17 Busca de destinatário | [spec](features/rf-17-busca-destinatario/spec.md) | [plano](features/rf-17-busca-destinatario/plan.md) | Aprovada |
-| 2 | RF-05 Transferência | [spec](features/rf-05-transferencia/spec.md) | [plano](features/rf-05-transferencia/plan.md) | Aprovada |
-| 2 | RF-06 Consulta de transferência | [spec](features/rf-06-consulta-transferencia/spec.md) | [plano](features/rf-06-consulta-transferencia/plan.md) | Aprovada |
-| 2 | RF-07 Extrato | [spec](features/rf-07-extrato/spec.md) | [plano](features/rf-07-extrato/plan.md) | Aprovada |
+| 1 | Foundation | [spec](features/nfr-foundation/spec.md) | [plan](features/nfr-foundation/plan.md) | Done |
+| 2 | Application base (errors, security, frontend shell) | [spec](features/nfr-application-base/spec.md) | [plan](features/nfr-application-base/plan.md) | Done |
+| 2 | API documentation (OpenAPI and Swagger UI) | [spec](features/nfr-api-docs/spec.md) | [plan](features/nfr-api-docs/plan.md) | Done |
+| 2 | FR-01 Registration and confirmation ([manual](features/fr-01-registration/manual.md)) | [spec](features/fr-01-registration/spec.md) | [plan](features/fr-01-registration/plan.md) | Done |
+| 2 | FR-02 Login and refresh | [spec](features/fr-02-login/spec.md) | [plan](features/fr-02-login/plan.md) | Approved |
+| 2 | FR-03 Logout | [spec](features/fr-03-logout/spec.md) | [plan](features/fr-03-logout/plan.md) | Approved |
+| 2 | Ledger and concurrency | [spec](features/nfr-ledger-concurrency/spec.md) | [plan](features/nfr-ledger-concurrency/plan.md) | Approved |
+| 2 | FR-08 Balance | [spec](features/fr-08-balance/spec.md) | [plan](features/fr-08-balance/plan.md) | Approved |
+| 2 | FR-04 Simulated deposit | [spec](features/fr-04-deposit/spec.md) | [plan](features/fr-04-deposit/plan.md) | Approved |
+| 2 | FR-17 Recipient lookup | [spec](features/fr-17-recipient-lookup/spec.md) | [plan](features/fr-17-recipient-lookup/plan.md) | Approved |
+| 2 | FR-05 Transfer | [spec](features/fr-05-transfer/spec.md) | [plan](features/fr-05-transfer/plan.md) | Approved |
+| 2 | FR-06 Transfer details | [spec](features/fr-06-transfer-details/spec.md) | [plan](features/fr-06-transfer-details/plan.md) | Approved |
+| 2 | FR-07 Statement | [spec](features/fr-07-statement/spec.md) | [plan](features/fr-07-statement/plan.md) | Approved |
 
-A ordem da tabela é a ordem de implementação da Fase 2: cada feature depende apenas das que estão acima dela.
+The table order is the Phase 2 implementation order: each feature depends only on the ones above it.
 
 ## ADRs
 
-| ADR | Título |
+| ADR | Title |
 | --- | --- |
-| [0001](adr/0001-registrar-decisoes-de-arquitetura.md) | Registrar decisões de arquitetura |
-| [0002](adr/0002-fundacao-stack-e-estrutura.md) | Fundação: stack, versões e estrutura do repositório |
-| [0003](adr/0003-specs-e-planos-por-feature.md) | Specs e planos por feature |
-| [0004](adr/0004-dinheiro-como-string-no-json.md) | Dinheiro como string no JSON |
-| [0005](adr/0005-senha-definida-na-ativacao.md) | Senha definida na ativação |
+| [0001](adr/0001-record-architecture-decisions.md) | Record architecture decisions |
+| [0002](adr/0002-foundation-stack-and-structure.md) | Foundation: stack, versions and repository structure |
+| [0003](adr/0003-specs-and-plans-per-feature.md) | Specs and plans per feature |
+| [0004](adr/0004-money-as-string-in-json.md) | Money as a string in JSON |
+| [0005](adr/0005-password-set-on-activation.md) | Password set on activation |
+| [0006](adr/0006-english-docs-portuguese-ui.md) | English documentation, Brazilian Portuguese UI |

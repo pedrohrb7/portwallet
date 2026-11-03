@@ -19,7 +19,7 @@ public @interface ApiProblem {
 
     int status();
 
-    /** The {@code type} of the catalog in docs/convencoes.md. */
+    /** The {@code type} of the catalog in docs/conventions.md. */
     String type();
 
     /** The {@code title} the API sends for this type. */

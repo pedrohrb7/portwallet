@@ -16,7 +16,7 @@ class ArchitectureTest {
             .that().resideInAPackage("..api..")
             .should().dependOnClassesThat().areAssignableTo(Repository.class)
             .orShould().dependOnClassesThat().resideInAPackage("..infra..")
-            .because("controllers delegate to the application layer (docs/convencoes.md)")
+            .because("controllers delegate to the application layer (docs/conventions.md)")
             .allowEmptyShould(true);
 
     @ArchTest

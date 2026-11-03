@@ -1,30 +1,31 @@
-# Plano: <ID> <Nome da feature>
+# Plan: <ID> <Feature name>
 
-- **Status:** Rascunho
+- **Status:** Draft
 - **Spec:** [spec.md](spec.md)
-- **Pré-requisitos:** <features concluídas antes desta>
+- **Prerequisites:** <features done before this one>
 
-## Passos
+## Steps
 
-Cada passo deixa o build verde e termina com o teste que o valida.
+Each step leaves the build green and ends with the test that validates it.
 
-### 1. <Título curto>
+### 1. <Short title>
 
-- [ ] <tarefa>
-- **Arquivos:** `<caminho>`
-- **Validação:** <teste ou comando que prova o passo>
+- [ ] <task>
+- **Files:** `<path>`
+- **Validation:** <test or command that proves the step>
 
 ### 2. <...>
 
-## Verificação final
+## Final verification
 
-- [ ] `./mvnw verify` verde
-- [ ] `npm run lint && npm run typecheck && npm test` verdes
-- [ ] Cenários E2E da feature verdes em Chromium e Firefox
-- [ ] Tela revisada em desktop e mobile
-- [ ] Spec atualizada com o que mudou na implementação
-- [ ] README e índice de `docs/` atualizados
+- [ ] `./mvnw verify` green
+- [ ] `npm run lint && npm run typecheck && npm test` green
+- [ ] Feature E2E scenarios green in Chromium and Firefox
+- [ ] Screen reviewed on desktop and mobile
+- [ ] Spec updated with what changed during implementation
+- [ ] User manual written or updated (features with a UI)
+- [ ] READMEs (`README.md` and `README.pt-BR.md`) and the `docs/` index updated
 
-## Riscos
+## Risks
 
-- <risco>: <mitigação>
+- <risk>: <mitigation>

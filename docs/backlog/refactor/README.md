@@ -5,11 +5,11 @@ Planned refactors that aren't urgent bugs but are worth doing deliberately, one 
 - File name: `YYYY-MM-DD-short-slug.md` (date opened, slug describing the refactor).
 - Start every new entry from `TEMPLATE.md`.
 - Update `Status` as it moves through `Proposed` -> `In progress` -> `Done` (link the PR) or `Dropped` (say why).
-- If a refactor is large enough to need a design decision, write a spec in `../../specs/` first and link it here instead of duplicating the reasoning.
+- If a refactor is large enough to need a design decision, write a spec in `../../features/` first and link it here instead of duplicating the reasoning.
 - Keep the index below in sync whenever an entry is created or its status changes.
 
 ## Index
 
 | Entry | Status |
 | --- | --- |
-| [Senha definida na ativação](2026-10-30-senha-na-ativacao.md) | Done |
+| [Password set on activation](2026-10-30-password-on-activation.md) | Done |

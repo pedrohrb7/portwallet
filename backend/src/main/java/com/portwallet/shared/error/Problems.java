@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 
-/** Factory for the generic problem types of the catalog in {@code docs/convencoes.md}. */
+/** Factory for the generic problem types of the catalog in {@code docs/conventions.md}. */
 public final class Problems {
 
     public static final String VALIDATION_ERROR = "validation-error";

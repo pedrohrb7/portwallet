@@ -1,7 +1,8 @@
 # Senha definida na ativação, em vez de conferida na ativação
 
-- **Status:** Proposed
+- **Status:** Done (2026-11-03, sem PR: trabalho local, ainda não commitado)
 - **Opened:** 2026-10-30
+- **Decision:** [ADR 0005](../../adr/0005-senha-definida-na-ativacao.md)
 - **Scope:** backend `auth` (cadastro, confirmação, entidade `User`, e-mails), `shared.openapi`, nova migration em `users`; frontend `features/auth` (`/register`, `/confirm`) e `api/`; testes de integração, unitários e E2E do cadastro; `docs/features/rf-01-cadastro`, `docs/convencoes.md`; PRD (RF-01)
 
 ## Motivation
@@ -86,3 +87,12 @@ ALTER TABLE users ADD CONSTRAINT ck_users_password_when_active
 - Rate limit da ativação e do cadastro (fase 5).
 - Recuperação de senha (RF-14).
 - Qualquer mudança no fluxo de login além de usuários `PENDING` sem senha.
+
+## Outcome
+
+Implementado em 2026-11-03, na ordem proposta. Diferenças em relação ao proposto:
+
+- **Migration `V5__password_set_on_activation.sql`** também apaga o hash dos usuários `PENDING` existentes, em vez de mantê-lo até a ativação: assim a regra 2 vale para todos os dados e nenhuma senha escolhida antes da verificação do e-mail fica gravada. Como consequência, `refresh_tokens` do RF-02 passou a ser `V6` e o ledger, `V7`.
+- **`NameMasker` em `shared.privacy`**, e não em `account.domain` como previa o RF-17: `auth` e `account` o usam. A máscara do CPF virou `Cpf.masked()`.
+- **Bug encontrado no E2E e corrigido:** abrir um segundo link de confirmação na mesma aba em que `/confirm` já estava aberta só muda o fragmento da URL, sem recarregar a página, e a tela continuava mostrando o resultado do link anterior. A tela agora escuta `hashchange` e recomeça com o novo token.
+- O exemplo de 422 do teste de contrato do OpenAPI (`OpenApiDocsContract`) passou a usar `insufficient-balance`.

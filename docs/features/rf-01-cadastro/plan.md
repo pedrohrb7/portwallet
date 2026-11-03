@@ -59,7 +59,7 @@
 - [x] `e2e/register.spec.ts`: cadastro, confirmação pelo link da caixa de entrada
 - **Validação:** `npm run e2e` verde em Chromium e Firefox
 
-### 9. Correção de segurança: pré-sequestro de conta
+### 9. Correção de segurança: pré-sequestro de conta (substituída pelo passo 10)
 
 Apontado por revisão de segurança automática depois do passo 8.
 

@@ -69,7 +69,7 @@ Nenhuma migration. A busca usa os índices únicos de `users.email` e `users.doc
 ## Backend
 
 - `account.application.RecipientService`: `lookup(UUID requesterId, String query)` e `recent(UUID requesterId)`.
-- `account.domain.NameMasker`.
+- `shared.privacy.NameMasker`, já criado pelo refactor de [senha na ativação](../../backlog/refactor/2026-10-30-senha-na-ativacao.md) ([ADR 0005](../../adr/0005-senha-definida-na-ativacao.md)).
 - `account.api.RecipientController`.
 
 ## Frontend

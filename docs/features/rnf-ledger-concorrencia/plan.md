@@ -8,9 +8,9 @@
 
 ### 1. Migration e entidades
 
-- [ ] `V6__ledger.sql` com a conta de sistema
+- [ ] `V7__ledger.sql` com a conta de sistema
 - [ ] `Transaction`, `LedgerEntry`, enums e repositórios
-- **Arquivos:** `db/migration/V6__ledger.sql`, `ledger/domain/**`, `ledger/infra/**`
+- **Arquivos:** `db/migration/V7__ledger.sql`, `ledger/domain/**`, `ledger/infra/**`
 - **Validação:** `./mvnw verify`
 
 ### 2. Regras da conta

@@ -12,4 +12,4 @@ Planned refactors that aren't urgent bugs but are worth doing deliberately, one 
 
 | Entry | Status |
 | --- | --- |
-| [Senha definida na ativação](2026-10-30-senha-na-ativacao.md) | Proposed |
+| [Senha definida na ativação](2026-10-30-senha-na-ativacao.md) | Done |

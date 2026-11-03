@@ -75,7 +75,7 @@ Resposta `200`: mesmo corpo do login, com um novo cookie.
 
 ## Modelo de dados
 
-`V5__refresh_tokens.sql`
+`V6__refresh_tokens.sql`
 
 ```sql
 CREATE TABLE refresh_tokens (

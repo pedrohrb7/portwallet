@@ -8,8 +8,8 @@
 
 ### 1. Máscara de nome
 
-- [ ] `NameMasker`
-- **Arquivos:** `account/domain/NameMasker.java`
+- [x] `NameMasker` (antecipado pelo refactor de senha na ativação, em `shared.privacy`)
+- **Arquivos:** `shared/privacy/NameMasker.java`
 - **Validação:** `NameMaskerTest`
 
 ### 2. Busca

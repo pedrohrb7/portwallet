@@ -16,7 +16,7 @@ Regras que valem para todas as features. Uma spec só repete uma regra daqui par
 | --- | --- | --- |
 | `validation-error` | 400 | Bean Validation, JSON malformado, parâmetro inválido |
 | `invalid-cursor` | 400 | Cursor do extrato que não decodifica |
-| `invalid-token` | 400 | Token de confirmação desconhecido, expirado ou já usado |
+| `invalid-token` | 400 | Token de confirmação desconhecido, expirado ou já usado (resumo e ativação) |
 | `unauthorized` | 401 | Access token ausente, inválido ou expirado |
 | `invalid-credentials` | 401 | Login com e-mail inexistente, senha errada ou conta não confirmada |
 | `invalid-refresh-token` | 401 | Refresh token ausente, expirado ou revogado |
@@ -32,7 +32,6 @@ Regras que valem para todas as features. Uma spec só repete uma regra daqui par
 | `daily-limit-exceeded` | 422 | Transferência passaria do limite diário |
 | `self-transfer` | 422 | Destino igual à origem |
 | `recipient-unavailable` | 422 | Destinatário deixou de estar ativo entre a busca e a transferência |
-| `wrong-password` | 422 | Senha da ativação diferente da do cadastro pendente; o link continua válido |
 | `internal-error` | 500 | Erro inesperado; detalhes só no log |
 
 Fases seguintes acrescentam tipos (`idempotency-*`, `totp-*`, `rate-limited`, `fraud-check-unavailable`) nas próprias specs e neste catálogo.

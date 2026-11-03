@@ -8,13 +8,13 @@
 
 ## Objetivo
 
-Permitir que uma pessoa crie conta com nome, e-mail, CPF fictício e senha, e a ative pelo link enviado por e-mail, sem que a resposta revele se o e-mail já estava cadastrado.
+Permitir que uma pessoa crie conta com nome, e-mail e CPF fictício, e a ative pelo link enviado por e-mail, definindo a senha nesse momento, sem que a resposta revele se o e-mail já estava cadastrado.
 
 ## Escopo
 
 **Inclui**
 
-- `POST /auth/register` e `POST /auth/confirm`.
+- `POST /auth/register`, `POST /auth/confirm/summary` e `POST /auth/confirm`.
 - Tabelas `users`, `user_tokens` e `accounts`; a conta é criada na confirmação.
 - CPF cifrado com AES-256-GCM e blind index HMAC-SHA256 desde já.
 - Serviço de notificação simulado, chamado em processo, e caixa de entrada de demonstração (`/mock/inbox`) nos perfis `dev`, `e2e` e `demo`.
@@ -22,29 +22,30 @@ Permitir que uma pessoa crie conta com nome, e-mail, CPF fictício e senha, e a 
 
 **Fica para depois**
 
-- Rate limit de cadastro (3 por hora por IP): fase 5.
+- Rate limit de cadastro (3 por hora por IP) e da ativação: fase 5.
 - Igualar o tempo de resposta entre e-mail novo e existente: fase 5.
 - Notificação por HTTP com circuit breaker e outbox: fase 4. A interface `NotificationGateway` criada aqui é o ponto de troca.
 - Registro na auditoria: fase 5.
 
 ## Comportamento
 
-1. Nome com 2 a 100 caracteres; e-mail válido, normalizado para minúsculas e sem espaços nas pontas; CPF com 11 dígitos (com ou sem máscara) e dígitos verificadores válidos; senha com 8 a 72 caracteres (72 é o limite do BCrypt).
+1. Nome com 2 a 100 caracteres; e-mail válido, normalizado para minúsculas e sem espaços nas pontas; CPF com 11 dígitos (com ou sem máscara) e dígitos verificadores válidos. O cadastro **não** pede senha; um campo `password` enviado é ignorado.
 2. Dados inválidos: 400 `validation-error`. A validação de formato não depende do banco, então não revela nada.
 3. Com dados válidos, a resposta é **sempre** `202` com o mesmo corpo, em todos os casos abaixo:
-   - **E-mail e CPF novos:** cria o usuário `PENDING`, com senha em BCrypt custo 12, e envia o e-mail de confirmação.
-   - **E-mail de usuário `PENDING`:** não cria outro usuário; **substitui** nome, CPF e senha do cadastro pendente pelos dados novos, invalida os tokens de confirmação anteriores e envia um novo link. Se o CPF novo pertence a outro usuário, vale o caso do CPF repetido abaixo e o cadastro pendente não muda.
+   - **E-mail e CPF novos:** cria o usuário `PENDING`, sem senha, e envia o e-mail de confirmação.
+   - **E-mail de usuário `PENDING`:** não cria outro usuário; **substitui** nome e CPF do cadastro pendente pelos dados novos, invalida os tokens de confirmação anteriores e envia um novo link. Se o CPF novo pertence a outro usuário, vale o caso do CPF repetido abaixo e o cadastro pendente não muda.
    - **E-mail de usuário `ACTIVE` ou `BLOCKED`:** não cria nada; envia ao dono um aviso de que alguém tentou cadastrar o e-mail dele.
    - **CPF já usado por outro usuário:** não cria nada e não envia nada ao e-mail informado; envia ao dono do CPF o mesmo aviso de tentativa de cadastro.
 4. O token de confirmação tem 32 bytes aleatórios em Base64URL, vale 24 h e só é usado uma vez. Só o hash SHA-256 fica no banco.
-5. O link de confirmação é `<APP_BASE_URL>/confirm#token=<token>`. O token vai no fragmento (`#`), que não é enviado ao servidor nem gravado em logs de acesso.
-6. `POST /auth/confirm` recebe o token **e a senha**. Com token válido e a senha do cadastro pendente mais recente, ativa o usuário, marca o token como usado e cria a conta com saldo 0,00 e limite diário de R$ 5.000,00, tudo na mesma transação. Resposta 200.
-7. Token desconhecido, expirado ou já usado: 400 `invalid-token`, com a mesma mensagem nos três casos.
-8. Token válido com senha diferente: 422 `wrong-password`. O token não é consumido, então o dono pode tentar de novo. Só quem tem o link (e, portanto, acesso ao e-mail) chega a essa resposta.
-9. A tela `/confirm` lê o token do fragmento, remove-o da URL com `history.replaceState` ao abrir, pede a senha do cadastro e mostra sucesso (com link para o login), senha incorreta no próprio campo, ou erro de link.
+5. O link de confirmação é `<APP_BASE_URL>/confirm#token=<token>`. O token vai no fragmento (`#`), que não é enviado ao servidor nem gravado em logs de acesso. O e-mail de confirmação mostra o nome completo e o CPF mascarado (`***.***.***-25`) do cadastro, e orienta a refazer o cadastro se os dados não forem do dono do e-mail.
+6. Usuários `PENDING` não têm senha; todo usuário `ACTIVE` ou `BLOCKED` tem. O banco garante isso com `ck_users_password_when_active`.
+7. `POST /auth/confirm/summary` recebe o token **no corpo** e, se ele é válido, devolve o nome mascarado (primeiro nome e inicial do último sobrenome, `shared.privacy.NameMasker`) e o CPF mascarado do cadastro. Não consome o token.
+8. `POST /auth/confirm` recebe o token e a senha **nova** (8 a 72 caracteres, até 72 bytes em UTF-8, porque o BCrypt ignora o resto). Com token válido, grava a senha em BCrypt custo 12, ativa o usuário, marca o token como usado e cria a conta com saldo 0,00 e limite diário de R$ 5.000,00, tudo na mesma transação. Resposta 200. A ativação nunca confere senha.
+9. Token desconhecido, expirado ou já usado, no resumo ou na ativação: 400 `invalid-token`, com a mesma mensagem nos três casos. Senha fora das regras: 400 `validation-error`, sem consumir o token.
+10. A tela `/confirm` lê o token do fragmento e o remove da URL com `history.replaceState` ao abrir; busca o resumo e pergunta "Estes são os seus dados?", com link para refazer o cadastro; pede a senha e a repetição dela (conferida só no cliente); mostra sucesso (com link para o login) ou erro de link. Um novo link aberto na mesma aba (só o fragmento muda) recomeça o fluxo com o novo token.
+11. A tela `/register` valida em tempo real com Zod (mesmas regras do backend) e, ao enviar, sempre mostra a mesma mensagem: "Se os dados estiverem corretos, você receberá um e-mail para ativar a conta."
 
-Juntas, as regras 3, 6 e 8 impedem o **pré-sequestro de conta**: sem elas, quem cadastrasse primeiro o e-mail de outra pessoa escolheria a senha da conta que o dono ativaria depois. Agora ativar exige controlar o e-mail e conhecer a senha do cadastro mais recente, então a conta ativada sempre tem a senha de quem a ativou.
-10. A tela `/register` valida em tempo real com Zod (mesmas regras do backend) e, ao enviar, sempre mostra a mesma mensagem: "Se os dados estiverem corretos, você receberá um e-mail para ativar a conta."
+Juntas, as regras 3, 6 e 8 impedem o **pré-sequestro de conta**: só quem controla o e-mail escolhe a senha, então cadastrar primeiro o e-mail de outra pessoa não dá acesso à conta. A troca de nome e CPF por quem recadastra o e-mail entre o cadastro e o clique do dono aparece no e-mail e no resumo do link mais recente (regras 5 e 7), e o dono refaz o cadastro ([ADR 0005](../../adr/0005-senha-definida-na-ativacao.md)).
 
 ## API
 
@@ -53,7 +54,7 @@ Juntas, as regras 3, 6 e 8 impedem o **pré-sequestro de conta**: sem elas, quem
 - **Acesso:** Público
 
 ```json
-{ "name": "Ana Souza", "email": "ana@demo.com", "document": "529.982.247-25", "password": "s3nh@forte" }
+{ "name": "Ana Souza", "email": "ana@demo.com", "document": "529.982.247-25" }
 ```
 
 Resposta `202`:
@@ -65,6 +66,25 @@ Resposta `202`:
 | Status | `type` | Quando |
 | --- | --- | --- |
 | 400 | `validation-error` | Formato inválido |
+
+### `POST /api/v1/auth/confirm/summary`
+
+- **Acesso:** Público
+
+```json
+{ "token": "q2Vx..." }
+```
+
+Resposta `200`:
+
+```json
+{ "maskedName": "Ana S****", "maskedDocument": "***.***.***-25" }
+```
+
+| Status | `type` | Quando |
+| --- | --- | --- |
+| 400 | `validation-error` | Token ausente |
+| 400 | `invalid-token` | Token desconhecido, expirado ou já usado |
 
 ### `POST /api/v1/auth/confirm`
 
@@ -82,9 +102,8 @@ Resposta `200`:
 
 | Status | `type` | Quando |
 | --- | --- | --- |
-| 400 | `validation-error` | Token ou senha ausentes, ou senha acima de 72 bytes |
+| 400 | `validation-error` | Token ou senha ausentes, senha com menos de 8 caracteres ou acima de 72 bytes |
 | 400 | `invalid-token` | Token desconhecido, expirado ou já usado |
-| 422 | `wrong-password` | Senha diferente da do cadastro pendente mais recente; o token continua válido |
 
 ### `GET /mock/inbox`
 
@@ -152,6 +171,15 @@ CREATE TABLE accounts (
 );
 ```
 
+`V5__password_set_on_activation.sql`
+
+```sql
+ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;
+UPDATE users SET password_hash = NULL WHERE status = 'PENDING';
+ALTER TABLE users ADD CONSTRAINT ck_users_password_when_active
+    CHECK (status = 'PENDING' OR password_hash IS NOT NULL);
+```
+
 A conta de sistema `EXTERNAL_FUNDS` e o uso de `balance` e `version` são definidos em [rnf-ledger-concorrencia](../rnf-ledger-concorrencia/spec.md).
 
 `V4__mock_inbox.sql`
@@ -177,11 +205,12 @@ As migrations usam constraints nomeadas (`uq_users_email`, `ck_accounts_balance`
 
 - `auth.domain`: `User`, `UserStatus`, `UserToken`, `TokenPurpose`, `Cpf` (valor com normalização e validação dos dígitos, que nunca imprime o número completo). `Role` fica em `shared.security`, criado na base da aplicação.
 - `auth.application.RegistrationService`: regras 3 e 4. Roda num `TransactionTemplate`; se dois cadastros simultâneos disputam o mesmo e-mail ou CPF, a violação de unicidade do perdedor é absorvida e a resposta continua a mesma.
-- `auth.application.ConfirmationService`: regras 6 a 8. Confere a senha com o `PasswordEncoder` antes de consumir o token; cria a conta por `account.application.AccountProvisioning` (`Propagation.MANDATORY`, para nunca existir usuário ativo sem conta). O token é consumido com `UPDATE ... WHERE used_at IS NULL`, que garante o uso único mesmo com confirmações simultâneas.
-- `auth.application.AuthEmails`: textos do e-mail de confirmação e do aviso de tentativa de cadastro (um só aviso para e-mail e CPF repetidos).
+- `auth.application.ConfirmationService`: regras 6 a 9. `summary` devolve o resumo mascarado sem consumir o token; `confirm` consome o token, grava a senha com o `PasswordEncoder` (`User.activate(passwordHash)`) e cria a conta por `account.application.AccountProvisioning` (`Propagation.MANDATORY`, para nunca existir usuário ativo sem conta). O token é consumido com `UPDATE ... WHERE used_at IS NULL`, que garante o uso único mesmo com confirmações simultâneas.
+- `auth.application.AuthEmails`: textos do e-mail de confirmação (com nome e CPF mascarado) e do aviso de tentativa de cadastro (um só aviso para e-mail e CPF repetidos).
 - `auth.application.PasswordConfig`: `BCryptPasswordEncoder` com custo 12.
-- `auth.api`: `AuthController`, `RegisterRequest` (normaliza nome, e-mail e CPF antes da validação), `@ValidCpf`. A senha também é limitada a 72 bytes em UTF-8 por `shared.validation.MaxUtf8Bytes`, porque o BCrypt ignora o que passa disso e um caractere acentuado ocupa dois bytes.
+- `auth.api`: `AuthController`, `RegisterRequest` (normaliza nome, e-mail e CPF antes da validação), `@ValidCpf`. A senha da ativação (`ConfirmRequest`) também é limitada a 72 bytes em UTF-8 por `shared.validation.MaxUtf8Bytes`, porque o BCrypt ignora o que passa disso e um caractere acentuado ocupa dois bytes.
 - `shared.crypto`: `FieldEncryptor` (AES-256-GCM, IV aleatório de 12 bytes, saída `Base64(iv || ciphertext || tag)`), `BlindIndex` (HMAC-SHA256 em hex), `EncryptedStringConverter` (usado em `document_enc` e, na fase 6, em `totp_secret_enc`) e `SecureTokens` (geração em Base64URL e hash SHA-256). Chaves em `PORTWALLET_CRYPTO_ENCRYPTION_KEY` e `PORTWALLET_CRYPTO_BLIND_INDEX_KEY` (32 bytes em Base64, diferentes entre si), validadas por `CryptoProperties`: a aplicação não sobe sem elas. Há valores de desenvolvimento nos perfis `dev`, `e2e` e `test`, e o `docker-compose.yml` passa valores de demonstração.
+- `shared.privacy.NameMasker` (regra 7; também usado pelo RF-17) e `Cpf.masked()`.
 - `shared.money.MoneyConverter`: `AttributeConverter` de `Money` para `DECIMAL(19,2)`, usado em `Account`.
 - `shared.notification.NotificationGateway` com `send(Email)`. Com `portwallet.mock.inbox.enabled=true`, a implementação é `mock.inbox.InboxNotificationGateway`, que grava em `mock_inbox_messages` por `InboxStore`. Sem a propriedade, `LoggingNotificationGateway` só registra no log o assunto e o destinatário mascarado (`shared.logging.Masking`).
 - `mock.inbox.InboxController`, condicionado à mesma propriedade.
@@ -189,17 +218,19 @@ As migrations usam constraints nomeadas (`uq_users_email`, `ck_accounts_balance`
 
 ## Frontend
 
-- `/register` (`RegisterPage`): formulário com `name`, `email`, `document` (máscara de CPF aplicada ao digitar), `password`; validação ao sair de cada campo e depois a cada mudança; erros de campo com `aria-invalid` e `aria-describedby`; erros de campo devolvidos pela API aparecem no campo; botão desabilitado durante o envio; `data-testid="register-success"` na mensagem final, com link para a caixa de entrada demo quando ela existe.
-- `/confirm` (`ConfirmPage`): formulário de senha ("Ativar conta"), sucesso (`data-testid="confirm-success"`), senha incorreta no campo, e erro de link (`data-testid="confirm-error"`, sem formulário). O token é lido no primeiro render (leitura pura, segura no Strict Mode), fica só em memória e sai da URL num effect ao abrir a página.
+- `/register` (`RegisterPage`): formulário com `name`, `email` e `document` (máscara de CPF aplicada ao digitar), sem senha; validação ao sair de cada campo e depois a cada mudança; erros de campo com `aria-invalid` e `aria-describedby`; erros de campo devolvidos pela API aparecem no campo; botão desabilitado durante o envio; `data-testid="register-success"` na mensagem final, com link para a caixa de entrada demo quando ela existe.
+- `/confirm` (`ConfirmPage`): carrega o resumo (`data-testid="confirm-summary"`, com tentar de novo em falha de rede), formulário "Crie uma senha" e "Repita a senha" (`activationSchema`), sucesso (`data-testid="confirm-success"`) e erro de link (`data-testid="confirm-error"`, sem formulário). O token é lido no primeiro render (leitura pura, segura no Strict Mode), fica só em memória e sai da URL num effect ao abrir a página; um `hashchange` com novo token remonta o fluxo.
 - `/inbox` (`InboxPage`): campo de e-mail (`data-testid="inbox-email"`), e-mail pesquisado refletido na URL (`/inbox?to=...`) e lista de mensagens (`data-testid="inbox-message"`) com assunto, data em São Paulo, corpo e link. A rota só existe quando `VITE_DEMO_INBOX=true` (`.env.development` e build do `docker compose`), e usa um layout mais largo e alinhado ao topo (`PublicWideLayout`).
 - Tela inicial com links para criar conta e para a caixa de entrada demo.
-- `src/features/auth/schemas.ts`: esquema Zod de cadastro (mesmas regras do backend, incluindo os 72 bytes da senha). `src/lib/cpf.ts`: validação e máscara de CPF, testadas com os mesmos casos do backend.
+- `src/features/auth/schemas.ts`: esquemas Zod de cadastro e de ativação (mesmas regras do backend, incluindo os 72 bytes da senha, e senhas iguais). `src/lib/cpf.ts`: validação e máscara de CPF, testadas com os mesmos casos do backend.
 - Componentes compartilhados: `TextField`, `Button` (desabilitado durante o envio) e `Alert`.
 - Proxy de `/mock` no Vite e no Nginx.
 
 ## Segurança
 
 - A resposta do cadastro não muda com o estado do e-mail ou do CPF (regra 3).
+- A senha trafega uma vez só, na ativação, e só é gravada depois que o dono do e-mail abre o link.
+- O token do resumo vai no corpo da requisição, não na URL.
 - Logs nunca mostram senha, token nem CPF; e-mail aparece mascarado (`a***@demo.com`).
 - O CPF em claro só existe em memória durante a requisição.
 
@@ -208,9 +239,9 @@ As migrations usam constraints nomeadas (`uq_users_email`, `ck_accounts_balance`
 | Camada | Cenário |
 | --- | --- |
 | Unitário | `CpfTest`: com e sem máscara, dígitos errados, sequências repetidas, máscara parcial, CPFs gerados. `CryptoTest`: cifras diferentes para o mesmo texto, ida e volta, adulteração e chave errada rejeitadas, blind index determinístico e dependente da chave, tokens, validação das chaves e app que não sobe sem elas |
-| Integração | `RegistrationTest`: os quatro casos da regra 3 com corpo idêntico e exatamente o e-mail esperado; CPF cifrado; BCrypt custo 12; e-mail normalizado; link antigo invalidado ao reenviar; pré-sequestro (atacante cadastra antes e depois da vítima, sem conseguir ativar a conta com a própria senha, e o CPF dele é liberado); cadastro pendente intacto quando o CPF novo é de outro usuário; validação de campos; senha acima de 72 bytes. `ConfirmationTest`: ativação com conta de saldo 0,00 e limite 5.000,00; token reutilizado, expirado e desconhecido dão `invalid-token`; senha errada dá `wrong-password` e o link continua valendo; campos ausentes. `InboxControllerTest`: lista por destinatário, mais recente primeiro, e 404 com a caixa desligada |
-| Unitário (frontend) | `cpf.test.ts` (mesmos casos do backend), `schemas.test.ts`, `RegisterPage.test.tsx` (máscara, dados normalizados, validação local, erro de campo da API, falha de rede), `ConfirmPage.test.tsx` em Strict Mode (token removido da URL ao abrir, ativação com token e senha, nova tentativa após senha errada, link inválido, ausência de token) |
-| E2E | `register.spec.ts`: cadastro pela interface, link pela tela da caixa de entrada demo e confirmação, sem o token na barra de endereço; link usado duas vezes; ativação exige a senha do cadastro mais recente (pré-sequestro); validação local sem chamar a API |
+| Integração | `RegistrationTest`: os quatro casos da regra 3 com corpo idêntico e exatamente o e-mail esperado (com nome e CPF mascarado); usuário pendente sem senha, mesmo se uma for enviada; CPF cifrado; e-mail normalizado; link antigo invalidado ao reenviar; pré-sequestro (atacante cadastra antes da vítima e não ganha acesso, e o CPF dele é liberado; atacante recadastra depois e os dados dele aparecem no resumo do link mais recente até a vítima refazer o cadastro); cadastro pendente intacto quando o CPF novo é de outro usuário; validação de campos. `ConfirmationTest`: resumo mascarado sem consumir o link; resumo de link inválido ou usado; ativação grava a senha em BCrypt custo 12 e abre a conta de saldo 0,00 e limite 5.000,00; token reutilizado não troca a senha; token expirado e desconhecido dão `invalid-token`; senha curta ou acima de 72 bytes dá `validation-error` sem consumir o link; campos ausentes; o banco recusa usuário ativo sem senha. `InboxControllerTest`: lista por destinatário, mais recente primeiro, e 404 com a caixa desligada. `NameMaskerTest`, `CpfTest` (máscara) |
+| Unitário (frontend) | `cpf.test.ts` (mesmos casos do backend), `schemas.test.ts` (cadastro e ativação), `RegisterPage.test.tsx` (máscara, dados normalizados, sem campo de senha, validação local, erro de campo da API, falha de rede), `ConfirmPage.test.tsx` em Strict Mode (token removido da URL ao abrir, resumo, ativação com a nova senha, senhas diferentes e senha curta sem chamar a API, link inválido no resumo e na ativação, novo link na mesma aba, nova tentativa após falha de rede, ausência de token) |
+| E2E | `register.spec.ts`: cadastro pela interface sem senha, e-mail com os dados, link pela caixa de entrada demo, resumo mascarado e definição da senha, sem o token na barra de endereço; link usado duas vezes; recadastro troca o resumo do link mais recente e invalida o anterior; validação local do cadastro e da repetição da senha sem chamar a API |
 
 ## Critérios de aceite
 
@@ -228,7 +259,7 @@ As migrations usam constraints nomeadas (`uq_users_email`, `ck_accounts_balance`
 - **Caixa de entrada ligada por propriedade, não por perfil:** `portwallet.mock.inbox.enabled` concentra a decisão num lugar só, e os testes conseguem desligá-la sem trocar de perfil.
 - **Criptografia em `shared.crypto`, não em `auth.infra.crypto`:** a entidade `User`, em `domain`, precisa do conversor, e o ArchUnit proíbe `domain` de depender de `infra`. O pacote também será usado pelo TOTP na fase 6.
 - **Um só aviso de tentativa de cadastro:** e-mail e CPF repetidos geram o mesmo texto, que não diz qual dado foi usado.
-- **Senha na ativação contra pré-sequestro de conta:** apontado por revisão de segurança depois da primeira implementação. Sobrescrever o cadastro pendente sozinho deixava uma janela (o atacante recadastra depois da vítima e antes do clique); exigir a senha fecha essa janela. Definir a senha só depois da ativação também resolveria, mas mudaria o RF-01 do PRD e a experiência de cadastro.
+- **Senha na ativação contra pré-sequestro de conta (substituída):** a primeira correção exigia, na ativação, a senha do cadastro mais recente (422 `wrong-password`). Foi substituída pela senha definida na ativação, com resumo dos dados antes de ativar ([ADR 0005](../../adr/0005-senha-definida-na-ativacao.md)).
 
 ## Questões em aberto
 

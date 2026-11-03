@@ -33,7 +33,7 @@ Publicar a documentação OpenAPI da API e o Swagger UI desde a Fase 2, para que
    - 400 `validation-error`, só quando a operação recebe corpo ou parâmetros;
    - 401 `unauthorized`, só quando a operação exige token (nunca em endpoints públicos);
    - 500 `internal-error`, sempre;
-   - os erros de negócio que o controller declara com `@ApiProblem` (ex.: 400 `invalid-token`, 422 `wrong-password`).
+   - os erros de negócio que o controller declara com `@ApiProblem` (ex.: 400 `invalid-token`, 422 `insufficient-balance`).
 
    Erros com o mesmo status ficam na mesma resposta, com um exemplo para cada `type` e a descrição em lista. As respostas aparecem em ordem de status.
 6. Respostas de sucesso e corpos de requisição são `application/json`, com exemplos nos campos.

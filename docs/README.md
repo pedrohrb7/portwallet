@@ -74,3 +74,4 @@ A ordem da tabela é a ordem de implementação da Fase 2: cada feature depende 
 | [0002](adr/0002-fundacao-stack-e-estrutura.md) | Fundação: stack, versões e estrutura do repositório |
 | [0003](adr/0003-specs-e-planos-por-feature.md) | Specs e planos por feature |
 | [0004](adr/0004-dinheiro-como-string-no-json.md) | Dinheiro como string no JSON |
+| [0005](adr/0005-senha-definida-na-ativacao.md) | Senha definida na ativação |

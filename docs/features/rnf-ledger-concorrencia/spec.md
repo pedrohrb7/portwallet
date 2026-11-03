@@ -43,7 +43,7 @@ Sem endpoints próprios. O saldo é exposto por [RF-08](../rf-08-saldo/spec.md) 
 
 ## Modelo de dados
 
-`V6__ledger.sql`
+`V7__ledger.sql`
 
 ```sql
 CREATE TABLE transactions (

@@ -8,8 +8,8 @@
 
 ### 1. Migration e domínio
 
-- [ ] `V5__refresh_tokens.sql`, entidade `RefreshToken` e repositório
-- **Arquivos:** `db/migration/V5__refresh_tokens.sql`, `auth/domain/RefreshToken.java`, `auth/infra/**`
+- [ ] `V6__refresh_tokens.sql`, entidade `RefreshToken` e repositório
+- **Arquivos:** `db/migration/V6__refresh_tokens.sql`, `auth/domain/RefreshToken.java`, `auth/infra/**`
 - **Validação:** `./mvnw verify`
 
 ### 2. Login

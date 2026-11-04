@@ -8,9 +8,9 @@
 
 ### 1. Migration and entities
 
-- [ ] `V7__ledger.sql` with the system account
+- [ ] `V8__ledger.sql` with the system account
 - [ ] `Transaction`, `LedgerEntry`, enums and repositories
-- **Files:** `db/migration/V7__ledger.sql`, `ledger/domain/**`, `ledger/infra/**`
+- **Files:** `db/migration/V8__ledger.sql`, `ledger/domain/**`, `ledger/infra/**`
 - **Validation:** `./mvnw verify`
 
 ### 2. Account rules

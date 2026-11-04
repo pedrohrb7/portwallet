@@ -1,6 +1,6 @@
 # Spec: FR-02 Login and refresh
 
-- **Status:** Approved
+- **Status:** Done
 - **Phase:** 2
 - **PRD:** FR-02; Security; US-02
 - **Depends on:** [fr-01-registration](../fr-01-registration/spec.md)
@@ -75,7 +75,7 @@ Response `200`: same body as login, with a new cookie.
 
 ## Data model
 
-`V6__refresh_tokens.sql`
+`V7__refresh_tokens.sql`
 
 ```sql
 CREATE TABLE refresh_tokens (
@@ -96,14 +96,16 @@ CREATE INDEX ix_refresh_tokens_user ON refresh_tokens (user_id);
 - `auth.domain.RefreshToken` and repository.
 - `auth.application.LoginService`: checks the password with `PasswordEncoder` and issues the token pair. A `PENDING` user has no password hash (`User.passwordHash()` is empty) and always fails.
 - `auth.application.RefreshTokenService`: issuing, rotation and revocation.
-- `auth.api.RefreshCookie`: builds and clears the cookie with `ResponseCookie`.
+- `auth.api.RefreshCookie`: builds and clears the cookie with `ResponseCookie`. `Max-Age` is the time left until the family expires, rounded up to whole seconds, so the milliseconds between issuing the token and writing the response do not cut a second off (a fresh login always gets `Max-Age=604800`).
 - `/auth/login` and `/auth/refresh` permitted in the `SecurityFilterChain`.
 
 ## Frontend
 
-- `/login`: e-mail and password, generic error in `role="alert"` (`data-testid="login-error"`), button disabled while submitting, link to `/register`.
-- `session.ts`: `login()`, `restore()` (refresh on load) and the current user state (`name`, `role`).
-- The `AppLayout` header shows the user's name.
+- `/login` (`features/auth/LoginPage.tsx`): e-mail and password, generic error in `role="alert"` (`data-testid="login-error"`), button disabled while submitting, link to `/register`. Same client rules as `LoginRequest` (`loginSchema`): e-mail trimmed and lowercased, password required and at most 72 bytes, with no other password rule, so a wrong password always reaches the server and gets the generic answer. After an `invalid-credentials` answer the e-mail stays and the password is cleared and focused.
+- After signing in, the user goes to the route `RequireAuth` sent them away from (`state.from`), or to `/`. Only paths inside the app are followed (`/...`, never `//...`). A user who is already signed in and opens `/login` goes straight there too.
+- `features/auth/session.ts`: `login()` calls `POST /auth/login` through `authClient` (a 401 there is a wrong credential and must not trigger a refresh) and stores the session in `sessionStore`; `restore()` runs the refresh on first load (`RootLayout`) only while the session is still `loading`, sharing the in-flight request of `refreshSession()`.
+- `/` follows the session (`routes/HomeRoute.tsx`): while the restore runs it shows the loading state, so a signed-in user never sees the public page flash by; visitors get the public `HomePage` (now with an **Entrar** link next to **Criar conta**); signed-in users get the `AppLayout` with `WelcomePage` ("Olá, {name}"), a placeholder the FR-08 dashboard replaces. `AppLayout` and `PublicLayout` take optional `children` for this route, and `SessionLoading` is shared with `RequireAuth`.
+- The `AppLayout` header shows the user's name (`data-testid="current-user"`).
 
 ## Security
 
@@ -116,19 +118,20 @@ CREATE INDEX ix_refresh_tokens_user ON refresh_tokens (user_id);
 | Layer | Scenario |
 | --- | --- |
 | Integration | Valid login returns a verifiable JWT and a cookie with the attributes of rule 4; unknown e-mail, wrong password and `PENDING` user return the same body; refresh rotates (the old token stops working); refresh with an expired or revoked token clears the cookie; refresh keeps the family's expiration |
-| Unit (frontend) | `restore()` with a 401 leaves the session `anonymous`; redirect to the original route |
-| E2E | PRD scenario 1 (login part); reloading the page keeps the user signed in |
+| Unit (frontend) | `session.test.ts`: `login()` stores the token and the user, a failure leaves the session untouched; `restore()` with a 401 leaves the session `anonymous`, sends a single request when called twice and none once the session is known. `LoginPage.test.tsx`: normalized request, redirect to the original route and never outside the app, generic error keeping the e-mail and clearing the password, client validation, disabled button while sending, network error, already signed-in user. `router.test.tsx`: `/` waits for the restore and shows the authenticated home with the name in the header |
+| E2E | `login.spec.ts`: login from the home page and reload keeping the session, with nothing readable by JavaScript (`document.cookie` empty, no token in the storages); signed-in user opening `/login`; wrong password and unknown e-mail with the same message; public home without a session. Users come from `e2e/support/users.ts` (`createActiveUser`) |
 
 ## Acceptance criteria
 
-- [ ] Access token only in memory; refresh only in an httpOnly cookie
-- [ ] Refresh rotated on every use
-- [ ] Session restored on page reload
+- [x] Access token only in memory; refresh only in an httpOnly cookie
+- [x] Refresh rotated on every use
+- [x] Session restored on page reload
 
 ## Decisions
 
 - **Fixed family expiration:** rotation does not extend the session beyond 7 days since login.
 - **`Path=/api/v1/auth` on the cookie:** the browser only sends the refresh token to the endpoints that need it.
+- **`/` follows the session instead of a separate `/app` route:** the FR-08 dashboard takes `/` for signed-in users, so the URL a user lands on after signing in does not change when it ships; only `WelcomePage` is replaced.
 
 ## Open questions
 

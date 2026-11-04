@@ -41,7 +41,7 @@
 - [x] Multi-stage `backend/Dockerfile` with Spring Boot layers, unprivileged user and healthcheck
 - [x] `frontend/Dockerfile` and `nginx.conf` with proxy and cache
 - [x] `docker-compose.yml` with `api` and `web`
-- **Validation:** `docker compose up --build --wait`, health through port 3000, cache headers checked
+- **Validation:** `docker compose up --build --wait`, health through port 7000, cache headers checked
 
 ### 6. CI
 

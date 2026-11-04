@@ -28,9 +28,9 @@ git clone <repository-url> portwallet && cd portwallet
 docker compose up --build
 ```
 
-Open <http://localhost:3000>. The port can be changed with `WEB_PORT=8000 docker compose up --build`.
+Open <http://localhost:7000>. The port can be changed with `WEB_PORT=7500 docker compose up --build`.
 
-Compose starts the API in the `demo` profile. In this profile, e-mails (such as the account activation link) arrive in the **demo inbox**, at <http://localhost:3000/inbox>. The [registration manual](docs/features/fr-01-registration/manual.md) walks through creating and activating an account.
+Compose starts the API in the `demo` profile. In this profile, e-mails (such as the account activation link) arrive in the **demo inbox**, at <http://localhost:7000/inbox>. The [registration manual](docs/features/fr-01-registration/manual.md) walks through creating and activating an account, and the [login manual](docs/features/fr-02-login/manual.md) through signing in.
 
 ### Environment variables
 
@@ -53,7 +53,7 @@ The default Compose is the public demo: the API is reachable only through Nginx 
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
 ```
 
-It runs the API in the `dev` profile and publishes port 8080 on the loopback only (`127.0.0.1`). The H2 console is at <http://localhost:8080/h2-console>: set the JDBC URL to `jdbc:h2:mem:portwallet` (the form suggests `jdbc:h2:~/test`), user `sa`, no password. The database lives in memory, so it starts empty on every API restart. To return to the demo, run `docker compose up -d` again.
+It runs the API in the `dev` profile and publishes port 7080 on the loopback only (`127.0.0.1`). The H2 console is at <http://localhost:7080/h2-console>: set the JDBC URL to `jdbc:h2:mem:portwallet` (the form suggests `jdbc:h2:~/test`), user `sa`, no password. The database lives in memory, so it starts empty on every API restart. To return to the demo, run `docker compose up -d` again.
 
 ## Pinned versions
 
@@ -87,18 +87,18 @@ Node.js 24 is also needed for the frontend.
 
 ```sh
 cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # API at http://localhost:8080
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # API at http://localhost:7080
 ./mvnw verify                                           # tests + coverage (target/site/jacoco)
 ```
 
-In the `dev` profile, the H2 console is at <http://localhost:8080/h2-console> (JDBC URL `jdbc:h2:mem:portwallet`, user `sa`, no password). Simulated e-mails are in the demo inbox, at <http://localhost:5173/inbox> with the frontend running.
+In the `dev` profile, the H2 console is at <http://localhost:7080/h2-console> (JDBC URL `jdbc:h2:mem:portwallet`, user `sa`, no password). Simulated e-mails are in the demo inbox, at <http://localhost:7173/inbox> with the frontend running.
 
 ### Frontend
 
 ```sh
 cd frontend
 npm install
-npm run dev         # http://localhost:5173, proxying /api to the backend
+npm run dev         # http://localhost:7173, proxying /api to the backend
 npm test            # unit tests (Vitest)
 npm run lint        # oxlint
 npm run typecheck   # tsc
@@ -131,8 +131,8 @@ portwallet/
 
 Swagger UI is available in the `dev` and `demo` profiles, and does not exist in the others:
 
-- With Docker: <http://localhost:3000/swagger-ui>. Port 8080 is not published: in Compose the API is reached only through the Nginx edge (unless you use the [development mode](#development-mode-h2-console)).
-- With the backend running locally (`./mvnw spring-boot:run`) in the `dev` profile: <http://localhost:8080/swagger-ui>
+- With Docker: <http://localhost:7000/swagger-ui>. Port 7080 is not published: in Compose the API is reached only through the Nginx edge (unless you use the [development mode](#development-mode-h2-console)).
+- With the backend running locally (`./mvnw spring-boot:run`) in the `dev` profile: <http://localhost:7080/swagger-ui>
 
 The OpenAPI 3.1 document is at `/v3/api-docs`. To call protected endpoints, sign in and paste the `accessToken` into "Authorize".
 

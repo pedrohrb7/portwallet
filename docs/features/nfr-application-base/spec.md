@@ -82,7 +82,7 @@ Dependencies: `react-router`, `@tanstack/react-query`, `axios`, `react-hook-form
 - `src/api/client.ts`: `api` instance with `baseURL: '/api/v1'`, an interceptor that injects `Authorization`, and a 401 interceptor that repeats the request once after `refreshSession()`. An `authClient` instance, without interceptors, for the cookie endpoints. `refreshSession()` shares the same promise among simultaneous callers.
 - `src/api/problem.ts`: `Problem` type, `toProblem(error)` (a network failure becomes `network-error`) and `messageFor(problem)`, which translates the `type` into a message; an unknown type falls back to a generic message.
 - `src/features/auth/sessionStore.ts`: external store (read with `useSyncExternalStore`) with the in-memory token and the session state (`loading`, `authenticated`, `anonymous`). It lives outside React so the Axios interceptor can read it.
-- `src/routes/`: `router.tsx`; `RootLayout` (banner and session restore on first load); `PublicLayout`; `RequireAuth`; `AppLayout` (header with navigation and user name); `navigation.ts` with the menu items; `NotFoundPage`; `HomePage` (the phase 1 home screen, public until the FR-08 dashboard takes `/`).
+- `src/routes/`: `router.tsx`; `RootLayout` (banner and session restore on first load); `PublicLayout`; `RequireAuth`; `AppLayout` (header with navigation and user name); `navigation.ts` with the menu items; `NotFoundPage`; `HomePage` (the phase 1 home screen). Since FR-02, `/` follows the session through `HomeRoute`: `HomePage` for visitors, the authenticated home for signed-in users, where the FR-08 dashboard goes.
 - `src/lib/money.ts`: `formatBRL(value: string)`.
 - `src/test/axiosMock.ts` and `src/test/renderRoutes.tsx`: test utilities.
 

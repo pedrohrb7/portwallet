@@ -139,7 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - run: docker compose up -d --build --wait
-      - run: curl -fsS http://localhost:3000/actuator/health | grep -q '"status":"UP"'
+      - run: curl -fsS http://localhost:7000/actuator/health | grep -q '"status":"UP"'
       - if: failure()
         run: docker compose logs
       - if: always()

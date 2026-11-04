@@ -118,7 +118,7 @@ Response `200`:
     "to": "ana@demo.com",
     "subject": "Ative sua conta PortWallet",
     "body": "Olá, Ana! Recebemos um cadastro na PortWallet com estes dados: ...",
-    "link": "http://localhost:5173/confirm#token=q2Vx...",
+    "link": "http://localhost:7173/confirm#token=q2Vx...",
     "createdAt": "2026-10-30T15:00:00Z"
   }
 ]
@@ -215,7 +215,7 @@ Migrations use named constraints (`uq_users_email`, `ck_accounts_balance` and so
 - `shared.money.MoneyConverter`: `AttributeConverter` from `Money` to `DECIMAL(19,2)`, used in `Account`.
 - `shared.notification.NotificationGateway` with `send(Email)`. With `portwallet.mock.inbox.enabled=true`, the implementation is `mock.inbox.InboxNotificationGateway`, which writes to `mock_inbox_messages` through `InboxStore`. Without the property, `LoggingNotificationGateway` only logs the subject and the masked recipient (`shared.logging.Masking`).
 - `mock.inbox.InboxController`, conditional on the same property.
-- `portwallet.app-base-url` (`APP_BASE_URL`, default `http://localhost:5173`; in `docker compose`, `http://localhost:3000`) to build the links.
+- `portwallet.app-base-url` (`APP_BASE_URL`, default `http://localhost:7173`; in `docker compose`, `http://localhost:7000`) to build the links.
 
 ## Frontend
 

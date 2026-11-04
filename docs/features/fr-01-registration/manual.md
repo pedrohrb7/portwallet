@@ -8,13 +8,13 @@ PortWallet opens in your browser's language when it is Portuguese, English, Span
 
 ## Before you start
 
-With the project running through Docker (`docker compose up --build`), the system is at <http://localhost:3000>.
+With the project running through Docker (`docker compose up --build`), the system is at <http://localhost:7000>.
 
 | What | Where |
 | --- | --- |
-| Home screen | <http://localhost:3000> |
-| Registration | <http://localhost:3000/register> |
-| Demo inbox (where e-mails arrive) | <http://localhost:3000/inbox> |
+| Home screen | <http://localhost:7000> |
+| Registration | <http://localhost:7000/register> |
+| Demo inbox (where e-mails arrive) | <http://localhost:7000/inbox> |
 
 In this environment no e-mail is actually sent: every message stays in the **demo inbox**, which works as your e-mail client.
 
@@ -49,7 +49,7 @@ This message is always the same, whether or not an account already exists for th
 
 ## Step 2: open the activation e-mail
 
-1. Click the **caixa de entrada demo** ("demo inbox") link below the message (or go to <http://localhost:3000/inbox>).
+1. Click the **caixa de entrada demo** ("demo inbox") link below the message (or go to <http://localhost:7000/inbox>).
 2. Type the e-mail used in the registration and click **Ver e-mails** ("See e-mails").
 3. Open the **"Ative sua conta PortWallet"** ("Activate your PortWallet account") message. It shows the registration data, for you to check:
 
@@ -76,9 +76,7 @@ The **Ativação da conta** ("Account activation") screen has two parts.
 2. In **Repita a senha** ("Repeat the password"), type the same password.
 3. Click **Ativar conta** ("Activate account").
 
-When everything works, the screen shows **"Conta ativada. Você já pode entrar com o seu e-mail e a senha que acabou de criar."** ("Account activated. You can now sign in with your e-mail and the password you just created.") and the **Ir para o login** ("Go to login") button.
-
-> Login arrives with FR-02. Until then, the **Ir para o login** button leads to a page that does not exist yet.
+When everything works, the screen shows **"Conta ativada. Você já pode entrar com o seu e-mail e a senha que acabou de criar."** ("Account activated. You can now sign in with your e-mail and the password you just created.") and the **Ir para o login** ("Go to login") button. It takes you to the login screen; see [how to sign in](../fr-02-login/manual.md).
 
 ## Common situations
 

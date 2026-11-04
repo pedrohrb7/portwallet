@@ -43,7 +43,7 @@ No endpoints of its own. The balance is exposed by [FR-08](../fr-08-balance/spec
 
 ## Data model
 
-`V7__ledger.sql`
+`V8__ledger.sql`
 
 ```sql
 CREATE TABLE transactions (

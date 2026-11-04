@@ -38,7 +38,7 @@ Publish the API's OpenAPI documentation and Swagger UI from Phase 2 on, so every
    Errors with the same status share the same response, with one example per `type` and the description as a list. Responses appear in status order.
 6. Success responses and request bodies are `application/json`, with examples on the fields.
 7. `Money` shows as a `string` with the pattern `^-?\d+\.\d{2}$` and example `"150.00"`, following [ADR 0004](../../adr/0004-money-as-string-in-json.md).
-8. The document uses a relative server (`/`), so "Try it out" works both directly on the API (`:8080`) and behind Nginx (`:3000`).
+8. The document uses a relative server (`/`), so "Try it out" works both directly on the API (`:7080`) and behind Nginx (`:7000`).
 9. In Swagger UI, the "Authorize" button accepts the access token returned by login.
 
 ## API
@@ -61,7 +61,7 @@ No migration.
 
 ## Frontend
 
-- `nginx.conf`: proxy of `/v3/api-docs` and `/swagger-ui` to the API, with `Host` and `X-Forwarded-Host` set to `$http_host`. Without `X-Forwarded-Host`, springdoc reads only `X-Forwarded-Proto` and builds URLs without the public port (`http://localhost/...` instead of `http://localhost:3000/...`). Vite needs no proxy: in development, Swagger UI is opened directly at `http://localhost:8080/swagger-ui`.
+- `nginx.conf`: proxy of `/v3/api-docs` and `/swagger-ui` to the API, with `Host` and `X-Forwarded-Host` set to `$http_host`. Without `X-Forwarded-Host`, springdoc reads only `X-Forwarded-Proto` and builds URLs without the public port (`http://localhost/...` instead of `http://localhost:7000/...`). Vite needs no proxy: in development, Swagger UI is opened directly at `http://localhost:7080/swagger-ui`.
 
 ## Security
 
@@ -73,7 +73,7 @@ No migration.
 | Layer | Scenario |
 | --- | --- |
 | Integration | `OpenApiDevProfileTest` and `OpenApiDemoProfileTest`, with the shared contract `OpenApiDocsContract`: `/v3/api-docs` answers 200 without token with OpenAPI 3.1, `bearerAuth`, server `/`, `Problem` schema; a protected endpoint without input documents only 200, 401 and 500, and a public endpoint never documents 401; one example per declared `type`, including two `type`s in the same 400; responses in status order; success as `application/json`; `Money` as a string; nothing outside `/api/v1`; `/swagger-ui` redirects to `index.html`, which opens without token. `OpenApiDisabledTest` (`test` and `e2e` profiles): both routes answer 404 `not-found` |
-| Docker | Through Nginx on port 3000: `/v3/api-docs`, `/swagger-ui` (302 to `http://localhost:3000/swagger-ui/index.html`), `/v3/api-docs/swagger-config` with the public port and Swagger UI reviewed in the browser |
+| Docker | Through Nginx on port 7000: `/v3/api-docs`, `/swagger-ui` (302 to `http://localhost:7000/swagger-ui/index.html`), `/v3/api-docs/swagger-config` with the public port and Swagger UI reviewed in the browser |
 
 ## Acceptance criteria
 

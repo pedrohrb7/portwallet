@@ -24,7 +24,7 @@
 
 - [x] Proxy of `/v3/api-docs` and `/swagger-ui`
 - **Files:** `frontend/nginx.conf`
-- **Validation:** `docker compose up --build --wait` and `curl` of both routes through port 3000
+- **Validation:** `docker compose up --build --wait` and `curl` of both routes through port 7000
 
 ### 4. Documentation
 

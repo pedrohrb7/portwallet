@@ -59,7 +59,7 @@ A spec describes a feature and evolves with it. An ADR records a decision that r
 | 2 | API documentation (OpenAPI and Swagger UI) | [spec](features/nfr-api-docs/spec.md) | [plan](features/nfr-api-docs/plan.md) | Done |
 | 2 | FR-01 Registration and confirmation ([manual](features/fr-01-registration/manual.md)) | [spec](features/fr-01-registration/spec.md) | [plan](features/fr-01-registration/plan.md) | Done |
 | 2 | Internationalization (pt-BR, en, es, fr) | [spec](features/nfr-i18n/spec.md) | [plan](features/nfr-i18n/plan.md) | Done |
-| 2 | FR-02 Login and refresh | [spec](features/fr-02-login/spec.md) | [plan](features/fr-02-login/plan.md) | Approved |
+| 2 | FR-02 Login and refresh ([manual](features/fr-02-login/manual.md)) | [spec](features/fr-02-login/spec.md) | [plan](features/fr-02-login/plan.md) | Done |
 | 2 | FR-03 Logout | [spec](features/fr-03-logout/spec.md) | [plan](features/fr-03-logout/plan.md) | Approved |
 | 2 | Ledger and concurrency | [spec](features/nfr-ledger-concurrency/spec.md) | [plan](features/nfr-ledger-concurrency/plan.md) | Approved |
 | 2 | FR-08 Balance | [spec](features/fr-08-balance/spec.md) | [plan](features/fr-08-balance/plan.md) | Approved |
@@ -82,3 +82,4 @@ The table order is the Phase 2 implementation order: each feature depends only o
 | [0005](adr/0005-password-set-on-activation.md) | Password set on activation |
 | [0006](adr/0006-english-docs-portuguese-ui.md) | English documentation, Brazilian Portuguese UI |
 | [0007](adr/0007-multilingual-product.md) | Multilingual product |
+| [0008](adr/0008-exposed-ports-in-7xxx-range.md) | Exposed ports in the 7xxx range |

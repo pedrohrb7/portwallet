@@ -27,7 +27,7 @@ Create the skeleton of the monorepo with backend, frontend, versioned database, 
 
 ## Behavior
 
-1. `docker compose up --build` starts the application at `http://localhost:3000` with no prior configuration.
+1. `docker compose up --build` starts the application at `http://localhost:7000` with no prior configuration.
 2. `GET /actuator/health` answers `200 {"status":"UP"}` without component details.
 3. The `/actuator/health/liveness` and `/actuator/health/readiness` probes answer 200; the container healthcheck uses readiness.
 4. Flyway applies the migrations on startup and Hibernate only validates the schema (`ddl-auto=validate`).
@@ -59,7 +59,7 @@ Nginx exposes only `/api/` and `/actuator/health`; the rest of Actuator never le
 
 - `DemoBanner` (`data-testid="demo-banner"`, `role="note"`).
 - `ApiStatus` (`data-testid="api-status"`, `data-status` attribute with `LOADING`, `UP`, `DOWN` or `UNKNOWN`).
-- Vite proxy for `/api` and `/actuator/health` (`API_URL`, default `http://localhost:8080`).
+- Vite proxy for `/api` and `/actuator/health` (`API_URL`, default `http://localhost:7080`).
 
 ## Tests
 

@@ -1,16 +1,13 @@
 import { useEffect } from 'react'
 import { Outlet } from 'react-router'
-import { refreshSession } from '../api/client'
 import { DemoBanner } from '../components/DemoBanner'
 import { LanguageSwitcher } from '../components/LanguageSwitcher'
-import { sessionStore } from '../features/auth/sessionStore'
+import { restore } from '../features/auth/session'
 
 /** Shell shared by every page: the demo banner, the language switcher and the session restore on first load. */
 export function RootLayout() {
   useEffect(() => {
-    if (sessionStore.getState().status === 'loading') {
-      void refreshSession()
-    }
+    void restore()
   }, [])
 
   return (

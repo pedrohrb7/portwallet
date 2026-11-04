@@ -17,7 +17,7 @@ export default defineConfig({
     ? [['html', { open: 'never' }], ['github']]
     : [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: 'http://localhost:5173',
+    baseURL: 'http://localhost:7173',
     // The UI follows the browser language; the suites assert the default language unless they set their own.
     locale: 'pt-BR',
     trace: 'on-first-retry',
@@ -31,13 +31,13 @@ export default defineConfig({
     {
       command: backendCommand,
       cwd: '../backend',
-      url: 'http://localhost:8080/actuator/health',
+      url: 'http://localhost:7080/actuator/health',
       timeout: 180_000,
       reuseExistingServer: !isCI,
     },
     {
       command: 'npm run dev',
-      url: 'http://localhost:5173',
+      url: 'http://localhost:7173',
       timeout: 60_000,
       reuseExistingServer: !isCI,
     },

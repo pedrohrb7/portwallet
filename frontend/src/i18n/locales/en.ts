@@ -14,6 +14,7 @@ export const en: Catalog = {
   home: {
     tagline: 'Digital wallet with idempotency, circuit breaker, rate limiting and security.',
     createAccount: 'Create account',
+    signIn: 'Sign in',
     demoInbox: 'Demo inbox',
   },
   apiStatus: {
@@ -66,6 +67,21 @@ export const en: Catalog = {
     submit: 'Activate account',
     submitting: 'Activating...',
   },
+  login: {
+    title: 'Sign in',
+    intro:
+      'Use the <nowrap>e-mail</nowrap> and the password you created when activating your account.',
+    email: 'E-mail',
+    password: 'Password',
+    submit: 'Sign in',
+    submitting: 'Signing in...',
+    noAccount: 'No account yet?',
+    createAccount: 'Create account',
+  },
+  welcome: {
+    title: 'Hello, {{name}}',
+    intro: 'Your balance and your transactions will show up here.',
+  },
   inbox: {
     title: 'Demo inbox',
     intro:
@@ -84,6 +100,7 @@ export const en: Catalog = {
     emailTooLong: 'E-mail too long',
     emailInvalid: 'Invalid e-mail',
     cpfInvalid: 'Invalid CPF',
+    passwordRequired: 'Enter the password',
     passwordTooShort: 'Use at least 8 characters',
     passwordTooLong: 'Use at most 72 characters',
     passwordTooManyBytes: 'Password too long',

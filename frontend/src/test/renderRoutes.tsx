@@ -1,15 +1,27 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 import { StrictMode } from 'react'
-import { createMemoryRouter, RouterProvider, type RouteObject } from 'react-router'
+import {
+  createMemoryRouter,
+  RouterProvider,
+  type InitialEntry,
+  type RouteObject,
+} from 'react-router'
 
 type Options = {
   /** Renders inside StrictMode, as main.tsx does, to catch effects that are not safe to run twice. */
   strict?: boolean
 }
 
-/** Renders routes in a memory router with a fresh query client, starting at `path`. */
-export function renderRoutes(routes: RouteObject[], path = '/', { strict = false }: Options = {}) {
+/**
+ * Renders routes in a memory router with a fresh query client, starting at `path` (a path, or a location with its
+ * navigation `state`).
+ */
+export function renderRoutes(
+  routes: RouteObject[],
+  path: InitialEntry = '/',
+  { strict = false }: Options = {},
+) {
   const router = createMemoryRouter(routes, { initialEntries: [path] })
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },

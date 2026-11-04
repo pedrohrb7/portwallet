@@ -17,6 +17,7 @@ export const ptBR = {
   home: {
     tagline: 'Carteira digital com idempotência, circuit breaker, rate limit e segurança.',
     createAccount: 'Criar conta',
+    signIn: 'Entrar',
     demoInbox: 'Caixa de entrada demo',
   },
   apiStatus: {
@@ -71,6 +72,20 @@ export const ptBR = {
     submit: 'Ativar conta',
     submitting: 'Ativando...',
   },
+  login: {
+    title: 'Entrar',
+    intro: 'Use o <nowrap>e-mail</nowrap> e a senha que você criou ao ativar a conta.',
+    email: 'E-mail',
+    password: 'Senha',
+    submit: 'Entrar',
+    submitting: 'Entrando...',
+    noAccount: 'Ainda não tem conta?',
+    createAccount: 'Criar conta',
+  },
+  welcome: {
+    title: 'Olá, {{name}}',
+    intro: 'Seu saldo e suas movimentações vão aparecer aqui.',
+  },
   inbox: {
     title: 'Caixa de entrada demo',
     intro:
@@ -89,6 +104,7 @@ export const ptBR = {
     emailTooLong: 'E-mail longo demais',
     emailInvalid: 'E-mail inválido',
     cpfInvalid: 'CPF inválido',
+    passwordRequired: 'Informe a senha',
     passwordTooShort: 'Use pelo menos 8 caracteres',
     passwordTooLong: 'Use no máximo 72 caracteres',
     passwordTooManyBytes: 'Senha longa demais',

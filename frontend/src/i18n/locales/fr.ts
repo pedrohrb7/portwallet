@@ -15,6 +15,7 @@ export const fr: Catalog = {
   home: {
     tagline: 'Portefeuille numérique avec idempotence, circuit breaker, rate limiting et sécurité.',
     createAccount: 'Créer un compte',
+    signIn: 'Se connecter',
     demoInbox: 'Boîte de réception démo',
   },
   apiStatus: {
@@ -69,6 +70,21 @@ export const fr: Catalog = {
     submit: 'Activer le compte',
     submitting: 'Activation...',
   },
+  login: {
+    title: 'Se connecter',
+    intro:
+      'Utilisez l’<nowrap>e-mail</nowrap> et le mot de passe créés lors de l’activation du compte.',
+    email: 'E-mail',
+    password: 'Mot de passe',
+    submit: 'Se connecter',
+    submitting: 'Connexion...',
+    noAccount: 'Pas encore de compte ?',
+    createAccount: 'Créer un compte',
+  },
+  welcome: {
+    title: 'Bonjour, {{name}}',
+    intro: 'Votre solde et vos opérations apparaîtront ici.',
+  },
   inbox: {
     title: 'Boîte de réception démo',
     intro:
@@ -87,6 +103,7 @@ export const fr: Catalog = {
     emailTooLong: 'E-mail trop long',
     emailInvalid: 'E-mail invalide',
     cpfInvalid: 'CPF invalide',
+    passwordRequired: 'Saisissez le mot de passe',
     passwordTooShort: 'Utilisez au moins 8 caractères',
     passwordTooLong: 'Utilisez 72 caractères au maximum',
     passwordTooManyBytes: 'Mot de passe trop long',

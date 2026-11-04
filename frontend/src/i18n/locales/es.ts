@@ -14,6 +14,7 @@ export const es: Catalog = {
   home: {
     tagline: 'Billetera digital con idempotencia, circuit breaker, rate limit y seguridad.',
     createAccount: 'Crear cuenta',
+    signIn: 'Iniciar sesión',
     demoInbox: 'Bandeja de entrada demo',
   },
   apiStatus: {
@@ -68,6 +69,21 @@ export const es: Catalog = {
     submit: 'Activar cuenta',
     submitting: 'Activando...',
   },
+  login: {
+    title: 'Iniciar sesión',
+    intro:
+      'Usa el <nowrap>correo electrónico</nowrap> y la contraseña que creaste al activar la cuenta.',
+    email: 'Correo electrónico',
+    password: 'Contraseña',
+    submit: 'Iniciar sesión',
+    submitting: 'Iniciando sesión...',
+    noAccount: '¿Todavía no tienes cuenta?',
+    createAccount: 'Crear cuenta',
+  },
+  welcome: {
+    title: 'Hola, {{name}}',
+    intro: 'Tu saldo y tus movimientos aparecerán aquí.',
+  },
   inbox: {
     title: 'Bandeja de entrada demo',
     intro:
@@ -86,6 +102,7 @@ export const es: Catalog = {
     emailTooLong: 'Correo electrónico demasiado largo',
     emailInvalid: 'Correo electrónico no válido',
     cpfInvalid: 'CPF no válido',
+    passwordRequired: 'Introduce la contraseña',
     passwordTooShort: 'Usa al menos 8 caracteres',
     passwordTooLong: 'Usa como máximo 72 caracteres',
     passwordTooManyBytes: 'Contraseña demasiado larga',

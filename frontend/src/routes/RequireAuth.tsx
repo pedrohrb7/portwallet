@@ -1,21 +1,16 @@
-import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, useLocation } from 'react-router'
 import { useSession } from '../features/auth/sessionStore'
+import { SessionLoading } from './SessionLoading'
 
 export type LoginRedirectState = { from: string }
 
 /** Guards the routes below it: waits for the session restore and sends anonymous users to /login. */
 export function RequireAuth() {
-  const { t } = useTranslation()
   const session = useSession()
   const location = useLocation()
 
   if (session.status === 'loading') {
-    return (
-      <p role="status" className="p-8 text-center text-sm text-slate-600">
-        {t('common.loading')}
-      </p>
-    )
+    return <SessionLoading />
   }
 
   if (session.status === 'anonymous') {

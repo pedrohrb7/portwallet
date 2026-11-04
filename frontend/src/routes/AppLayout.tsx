@@ -1,9 +1,14 @@
+import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet } from 'react-router'
 import { useSession } from '../features/auth/sessionStore'
 import { navItems } from './navigation'
 
-export function AppLayout() {
+/**
+ * Shell of the authenticated area: header with the navigation and the user's name. Renders `children` when given,
+ * for a route that picks its layout itself (HomeRoute), and the child route otherwise.
+ */
+export function AppLayout({ children }: { children?: ReactNode }) {
   const { t } = useTranslation()
   const session = useSession()
 
@@ -42,9 +47,7 @@ export function AppLayout() {
           )}
         </div>
       </header>
-      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">
-        <Outlet />
-      </main>
+      <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8">{children ?? <Outlet />}</main>
     </>
   )
 }

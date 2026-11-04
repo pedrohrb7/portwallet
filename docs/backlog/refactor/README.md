@@ -13,3 +13,4 @@ Planned refactors that aren't urgent bugs but are worth doing deliberately, one 
 | Entry | Status |
 | --- | --- |
 | [Password set on activation](2026-10-30-password-on-activation.md) | Done |
+| [Split the frontend bundle by route](2026-11-04-frontend-bundle-code-splitting.md) | Proposed |

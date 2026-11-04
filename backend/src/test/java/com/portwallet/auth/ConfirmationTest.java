@@ -10,7 +10,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.portwallet.mock.inbox.InboxStore;
+import com.portwallet.mock.inbox.InboxStore.InboxMessage;
 import com.portwallet.support.TestData;
+import com.portwallet.support.TestUsers;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -21,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -105,6 +108,60 @@ class ConfirmationTest {
         assertThat(account.get("kind")).isEqualTo("USER");
         assertThat((BigDecimal) account.get("balance")).isEqualByComparingTo("0.00");
         assertThat((BigDecimal) account.get("daily_limit")).isEqualByComparingTo("5000.00");
+    }
+
+    @Test
+    void activationSendsTheAccountActivatedEmailWithTheLoginLink() throws Exception {
+        String email = registerPending("Ana Souza Lima", TestData.validCpf());
+
+        confirm(tokenFor(email)).andExpect(status().isOk());
+
+        List<InboxMessage> messages = inbox.findByRecipient(email);
+        assertThat(messages).extracting(InboxMessage::subject)
+                .containsExactly("Sua conta PortWallet está ativa", "Ative sua conta PortWallet");
+        InboxMessage activated = messages.getFirst();
+        assertThat(activated.link()).isEqualTo("http://localhost:7173/login");
+        assertThat(activated.body())
+                .startsWith("Olá, Ana!")
+                .contains("Sua conta PortWallet foi ativada", "http://localhost:7173/login")
+                // Nothing of the account beyond the first name.
+                .doesNotContain("Souza Lima", "CPF");
+    }
+
+    @Test
+    void accountActivatedEmailIsInTheLanguageOfTheRegistration() throws Exception {
+        String email = TestData.uniqueEmail();
+        mockMvc.perform(post("/api/v1/auth/register")
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, "en")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("name", "Ana Souza", "email", email, "document", TestData.validCpf()))))
+                .andExpect(status().isAccepted());
+
+        // Activated from a browser in another language: the e-mail still follows the registration.
+        mockMvc.perform(post("/api/v1/auth/confirm")
+                        .header(HttpHeaders.ACCEPT_LANGUAGE, "es")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(Map.of("token", tokenFor(email), "password", PASSWORD))))
+                .andExpect(status().isOk());
+
+        InboxMessage activated = inbox.findByRecipient(email).getFirst();
+        assertThat(activated.subject()).isEqualTo("Your PortWallet account is active");
+        assertThat(activated.body()).startsWith("Hello, Ana!");
+    }
+
+    @Test
+    void refusedActivationSendsNoEmail() throws Exception {
+        String email = registerPending();
+        String token = tokenFor(email);
+
+        confirm(token, "short").andExpect(status().isBadRequest());
+        assertThat(inbox.findByRecipient(email)).hasSize(1);
+
+        confirm(token).andExpect(status().isOk());
+        confirm(token).andExpect(status().isBadRequest());
+        assertThat(inbox.findByRecipient(email)).extracting(InboxMessage::subject)
+                .containsExactly("Sua conta PortWallet está ativa", "Ative sua conta PortWallet");
     }
 
     @Test
@@ -203,8 +260,7 @@ class ConfirmationTest {
     }
 
     private String tokenFor(String email) {
-        String link = inbox.findByRecipient(email).getFirst().link();
-        return link.substring(link.indexOf("#token=") + "#token=".length());
+        return TestUsers.latestConfirmationToken(inbox, email);
     }
 
     /** Value of one column of the user, which may be null. */

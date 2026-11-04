@@ -29,6 +29,12 @@ class AuthEmails {
         return email(user, "email.confirmation", link, user.firstName(), user.name(), user.cpf().masked(), link);
     }
 
+    /** Sent once the account is active: confirms the activation and points to the login. */
+    Email accountActivated(User user) {
+        String link = appBaseUrl + "/login";
+        return email(user, "email.account-activated", link, user.firstName(), link);
+    }
+
     Email registrationAttempt(User owner) {
         String link = appBaseUrl + "/login";
         return email(owner, "email.registration-attempt", link, owner.firstName(), link);

@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test'
 import { uniqueEmail, validCpf } from './support/data.ts'
-import { linkFromInbox } from './support/inbox.ts'
+import { linkFromInbox, openInboxMessage } from './support/inbox.ts'
 
 const genericMessage =
   'Se os dados estiverem corretos, você receberá um e-mail para ativar a conta.'
@@ -28,9 +28,7 @@ test('registers and activates the account through the demo inbox', async ({ page
   await page.getByRole('link', { name: 'caixa de entrada demo' }).click()
   await page.getByTestId('inbox-email').fill(email)
   await page.getByRole('button', { name: 'Ver e-mails' }).click()
-  const message = page
-    .getByTestId('inbox-message')
-    .filter({ hasText: 'Ative sua conta PortWallet' })
+  const message = await openInboxMessage(page, 'Ative sua conta PortWallet')
   await expect(message).toContainText('Nome: Ana Souza Lima')
   await expect(message).toContainText(`CPF: ***.***.***-${cpf.slice(9)}`)
   await message.getByRole('link', { name: 'Abrir link' }).click()
@@ -46,6 +44,19 @@ test('registers and activates the account through the demo inbox', async ({ page
 
   await expect(page.getByTestId('confirm-success')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Ir para o login' })).toBeVisible()
+
+  // The activation is confirmed by e-mail, listed in the demo inbox above the activation e-mail.
+  await page.goto(`/inbox?to=${encodeURIComponent(email)}`)
+  const messages = page.getByTestId('inbox-message')
+  await expect(messages).toHaveCount(2)
+  await expect(messages.first()).toContainText('Sua conta PortWallet está ativa')
+  await expect(messages.nth(1)).toContainText('Ative sua conta PortWallet')
+  const activated = await openInboxMessage(page, 'Sua conta PortWallet está ativa')
+  await expect(activated).toContainText('Olá, Ana!')
+  await expect(activated).not.toContainText('CPF')
+  await activated.getByRole('link', { name: 'Abrir link' }).click()
+  await expect(page).toHaveURL(/\/login$/)
+  await expect(page.getByRole('heading', { name: 'Entrar' })).toBeVisible()
 })
 
 async function registerByApi(

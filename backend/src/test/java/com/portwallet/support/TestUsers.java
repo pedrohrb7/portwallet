@@ -14,6 +14,8 @@ public final class TestUsers {
 
     public static final String PASSWORD = "s3nh@forte";
 
+    private static final String TOKEN_MARKER = "#token=";
+
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final InboxStore inbox;
@@ -38,12 +40,24 @@ public final class TestUsers {
     /** Registers and activates a user with {@link #PASSWORD}. Returns the e-mail. */
     public String active(String name) throws Exception {
         String email = pending(name);
-        String link = inbox.findByRecipient(email).getFirst().link();
-        String token = link.substring(link.indexOf("#token=") + "#token=".length());
+        String token = latestConfirmationToken(inbox, email);
         mockMvc.perform(post("/api/v1/auth/confirm")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(Map.of("token", token, "password", PASSWORD))))
                 .andExpect(status().isOk());
         return email;
+    }
+
+    /**
+     * Token of the newest confirmation link sent to {@code email}. Picks the confirmation e-mail itself, since newer
+     * e-mails without a token (such as the account activated one) may sit above it in the inbox.
+     */
+    public static String latestConfirmationToken(InboxStore inbox, String email) {
+        String link = inbox.findByRecipient(email).stream()
+                .map(InboxStore.InboxMessage::link)
+                .filter(candidate -> candidate != null && candidate.contains(TOKEN_MARKER))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("No confirmation link sent to " + email));
+        return link.substring(link.indexOf(TOKEN_MARKER) + TOKEN_MARKER.length());
     }
 }

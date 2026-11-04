@@ -1,4 +1,4 @@
-import { expect, type APIRequestContext } from '@playwright/test'
+import { expect, type APIRequestContext, type Locator, type Page } from '@playwright/test'
 
 type InboxMessage = { subject: string; link: string | null }
 
@@ -18,4 +18,15 @@ export async function linkFromInbox(
     })
     .not.toBeNull()
   return link!
+}
+
+/**
+ * Expands the demo inbox message with the given subject, as a reader clicking it would, and returns it. Messages
+ * are collapsed in the list, so their body and link are only visible after this.
+ */
+export async function openInboxMessage(page: Page, subject: string): Promise<Locator> {
+  const message = page.getByTestId('inbox-message').filter({ hasText: subject })
+  await message.getByRole('heading', { name: subject }).click()
+  await expect(message.getByTestId('inbox-preview')).toBeHidden()
+  return message
 }

@@ -24,6 +24,7 @@ In this environment no e-mail is actually sent: every message stays in the **dem
 2. The system sends an e-mail with an activation link.
 3. You open the link, check your data and **create the password**.
 4. The account is activated and your wallet is opened with a balance of R$ 0.00.
+5. You receive an e-mail confirming that the account is active.
 
 ## Step 1: fill in the registration
 
@@ -51,7 +52,7 @@ This message is always the same, whether or not an account already exists for th
 
 1. Click the **caixa de entrada demo** ("demo inbox") link below the message (or go to <http://localhost:7000/inbox>).
 2. Type the e-mail used in the registration and click **Ver e-mails** ("See e-mails").
-3. Open the **"Ative sua conta PortWallet"** ("Activate your PortWallet account") message. It shows the registration data, for you to check:
+3. The messages are listed newest first, collapsed: each one shows the subject, the date and the beginning of the text. Click the **"Ative sua conta PortWallet"** ("Activate your PortWallet account") message to expand it (or reach it with Tab and press Enter); click it again to collapse it. It shows the registration data, for you to check:
 
    ```text
    Nome: Ana Souza Lima
@@ -77,6 +78,12 @@ The **Ativação da conta** ("Account activation") screen has two parts.
 3. Click **Ativar conta** ("Activate account").
 
 When everything works, the screen shows **"Conta ativada. Você já pode entrar com o seu e-mail e a senha que acabou de criar."** ("Account activated. You can now sign in with your e-mail and the password you just created.") and the **Ir para o login** ("Go to login") button. It takes you to the login screen; see [how to sign in](../fr-02-login/manual.md).
+
+## Step 4: the activation confirmation e-mail
+
+Right after the activation, a **"Sua conta PortWallet está ativa"** ("Your PortWallet account is active") e-mail arrives, in the language you registered in. In the demo inbox it shows at the top of the list, above the activation e-mail; click it to expand it. Its **Abrir link** ("Open link") button also leads to the login screen.
+
+The e-mail only says that the account was activated: it shows no data of the account besides your first name. If you receive it without having activated an account, someone may have access to your e-mail; change the password of your e-mail.
 
 ## Common situations
 

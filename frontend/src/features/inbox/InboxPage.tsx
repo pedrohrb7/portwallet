@@ -9,6 +9,11 @@ import { Button } from '../../components/Button'
 import { TextField } from '../../components/TextField'
 import { currentLanguage } from '../../i18n'
 
+/** One-line preview of a body: its text with line breaks collapsed; the CSS cuts it to the card width. */
+function preview(body: string): string {
+  return body.replace(/\s+/g, ' ').trim()
+}
+
 export function InboxPage() {
   const { t } = useTranslation()
   const language = currentLanguage()
@@ -73,25 +78,56 @@ export function InboxPage() {
             <li
               key={message.id}
               data-testid="inbox-message"
-              className="flex flex-col gap-2 rounded-md border border-slate-200 bg-white p-4 shadow-sm"
+              className="rounded-md border border-slate-200 bg-white shadow-sm"
             >
-              <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                <h2 className="font-medium">{message.subject}</h2>
-                <time dateTime={message.createdAt} className="text-xs text-slate-500">
-                  {dateFormat.format(new Date(message.createdAt))}
-                </time>
-              </div>
-              <p className="whitespace-pre-line text-sm break-words text-slate-700">
-                {message.body}
-              </p>
-              {message.link && (
-                <a
-                  href={message.link}
-                  className="w-fit text-sm font-medium text-slate-900 underline underline-offset-4"
-                >
-                  {t('inbox.openLink')}
-                </a>
-              )}
+              {/* Native disclosure: collapsed by default, opened by click, Enter or Space on the summary. */}
+              <details className="group">
+                <summary className="flex cursor-pointer list-none items-start gap-3 rounded-md p-4 outline-none hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-slate-900/20 group-open:rounded-b-none [&::-webkit-details-marker]:hidden">
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    {/* Stacked on narrow screens, so every card puts the date in the same place. */}
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
+                      <h2 className="font-medium">{message.subject}</h2>
+                      <time
+                        dateTime={message.createdAt}
+                        className="shrink-0 text-xs text-slate-500"
+                      >
+                        {dateFormat.format(new Date(message.createdAt))}
+                      </time>
+                    </div>
+                    <p
+                      className="truncate text-sm text-slate-500 group-open:hidden"
+                      data-testid="inbox-preview"
+                    >
+                      {preview(message.body)}
+                    </p>
+                  </div>
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    className="mt-0.5 size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </summary>
+                <div className="flex flex-col gap-2 border-t border-slate-100 px-4 pt-3 pb-4">
+                  <p className="text-sm break-words whitespace-pre-line text-slate-700">
+                    {message.body}
+                  </p>
+                  {message.link && (
+                    <a
+                      href={message.link}
+                      className="w-fit text-sm font-medium text-slate-900 underline underline-offset-4"
+                    >
+                      {t('inbox.openLink')}
+                    </a>
+                  )}
+                </div>
+              </details>
             </li>
           ))}
         </ul>

@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { uniqueEmail, validCpf } from './support/data.ts'
+import { openInboxMessage } from './support/inbox.ts'
 
 test.describe('in an English browser', () => {
   test.use({ locale: 'en-US' })
@@ -26,9 +27,7 @@ test.describe('in an English browser', () => {
     await page.getByRole('link', { name: 'demo inbox' }).click()
     await page.getByTestId('inbox-email').fill(email)
     await page.getByRole('button', { name: 'View e-mails' }).click()
-    const message = page
-      .getByTestId('inbox-message')
-      .filter({ hasText: 'Activate your PortWallet account' })
+    const message = await openInboxMessage(page, 'Activate your PortWallet account')
     await expect(message).toContainText('Hello, Ana!')
     await expect(message).toContainText('Name: Ana Souza Lima')
     await message.getByRole('link', { name: 'Open link' }).click()

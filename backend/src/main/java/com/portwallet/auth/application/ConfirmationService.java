@@ -8,6 +8,7 @@ import com.portwallet.auth.domain.UserToken;
 import com.portwallet.auth.infra.UserRepository;
 import com.portwallet.auth.infra.UserTokenRepository;
 import com.portwallet.shared.crypto.SecureTokens;
+import com.portwallet.shared.notification.NotificationGateway;
 import com.portwallet.shared.privacy.NameMasker;
 import java.time.Clock;
 import java.time.Instant;
@@ -27,14 +28,18 @@ public class ConfirmationService {
     private final UserRepository users;
     private final AccountProvisioning accounts;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationGateway notifications;
+    private final AuthEmails emails;
     private final Clock clock;
 
     ConfirmationService(UserTokenRepository tokens, UserRepository users, AccountProvisioning accounts,
-            PasswordEncoder passwordEncoder, Clock clock) {
+            PasswordEncoder passwordEncoder, NotificationGateway notifications, AuthEmails emails, Clock clock) {
         this.tokens = tokens;
         this.users = users;
         this.accounts = accounts;
         this.passwordEncoder = passwordEncoder;
+        this.notifications = notifications;
+        this.emails = emails;
         this.clock = clock;
     }
 
@@ -45,7 +50,10 @@ public class ConfirmationService {
         return new RegistrationSummary(NameMasker.mask(user.name()), user.cpf().masked());
     }
 
-    /** Sets the password, activates the user and opens the wallet account, in one transaction. */
+    /**
+     * Sets the password, activates the user, opens the wallet account and tells the user by e-mail, in one transaction:
+     * a refused or failed activation sends nothing.
+     */
     @Transactional
     public void confirm(String rawToken, String password) {
         Instant now = clock.instant();
@@ -56,6 +64,7 @@ public class ConfirmationService {
         }
         user.activate(passwordEncoder.encode(password));
         accounts.openUserAccount(user.id());
+        notifications.send(emails.accountActivated(user));
     }
 
     private UserToken usableToken(String rawToken, Instant now) {

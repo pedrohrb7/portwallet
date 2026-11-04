@@ -11,6 +11,7 @@ import com.portwallet.mock.inbox.InboxStore;
 import com.portwallet.mock.inbox.InboxStore.InboxMessage;
 import com.portwallet.shared.crypto.BlindIndex;
 import com.portwallet.support.TestData;
+import com.portwallet.support.TestUsers;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -364,8 +365,7 @@ class RegistrationTest {
     }
 
     private String latestToken(String email) {
-        String link = inbox.findByRecipient(email).getFirst().link();
-        return link.substring(link.indexOf("#token=") + "#token=".length());
+        return TestUsers.latestConfirmationToken(inbox, email);
     }
 
     /** Value of one column of the user, which may be null. */

@@ -53,7 +53,8 @@ public class SecurityConfig implements WebMvcConfigurer {
                         .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
                         .requestMatchers("/actuator/**").hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/register", "/api/v1/auth/confirm",
-                                "/api/v1/auth/confirm/summary").permitAll()
+                                "/api/v1/auth/confirm/summary", "/api/v1/auth/login", "/api/v1/auth/refresh")
+                        .permitAll()
                         // Demo inbox: only exists where portwallet.mock.inbox.enabled is true; 404 elsewhere.
                         .requestMatchers(HttpMethod.GET, "/mock/inbox").permitAll()
                         // API docs only exist in the dev and demo profiles; elsewhere these routes are 404.

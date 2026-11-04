@@ -3,13 +3,13 @@ services:
     build: ./backend
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-demo}
-      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:${WEB_PORT:-3000}}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:${WEB_PORT:-7000}}
       # INSECURE demo defaults, so the project runs with no setup. Override them anywhere else.
       JWT_SECRET: ${JWT_SECRET:-demo-only-insecure-jwt-secret-0123456789abcdef}
       PORTWALLET_CRYPTO_ENCRYPTION_KEY: ${PORTWALLET_CRYPTO_ENCRYPTION_KEY:-VvZ9WEXOEpb0Ouf6beBFWo25XE65uGW2K7ZoDsqbatM=}
       PORTWALLET_CRYPTO_BLIND_INDEX_KEY: ${PORTWALLET_CRYPTO_BLIND_INDEX_KEY:-aTx5ercNAMa2DyuGJoOCKH/BQAHhp0T2DbmYzm81cdw=}
     expose:
-      - "8080"
+      - "7080"
     restart: unless-stopped
 
   web:
@@ -19,7 +19,7 @@ services:
         # Shows the demo inbox in the menu; the API serves it in the demo profile.
         VITE_DEMO_INBOX: "true"
     ports:
-      - "${WEB_PORT:-3000}:80"
+      - "${WEB_PORT:-7000}:80"
     depends_on:
       api:
         condition: service_healthy

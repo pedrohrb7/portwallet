@@ -1,11 +1,16 @@
 package com.portwallet.auth.api;
 
+import com.portwallet.auth.application.AuthSession;
 import com.portwallet.auth.application.ConfirmationService;
+import com.portwallet.auth.application.InvalidRefreshTokenException;
+import com.portwallet.auth.application.LoginService;
+import com.portwallet.auth.application.RefreshTokenService;
 import com.portwallet.auth.application.RegistrationService;
 import com.portwallet.shared.i18n.Language;
 import com.portwallet.shared.openapi.ApiProblem;
 import com.portwallet.shared.validation.MaxUtf8Bytes;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
@@ -14,9 +19,15 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import java.time.Clock;
 import java.util.Locale;
 import org.springframework.context.MessageSource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,12 +47,19 @@ class AuthController {
 
     private final RegistrationService registration;
     private final ConfirmationService confirmation;
+    private final LoginService login;
+    private final RefreshTokenService refreshTokens;
     private final MessageSource messages;
+    private final Clock clock;
 
-    AuthController(RegistrationService registration, ConfirmationService confirmation, MessageSource messages) {
+    AuthController(RegistrationService registration, ConfirmationService confirmation, LoginService login,
+            RefreshTokenService refreshTokens, MessageSource messages, Clock clock) {
         this.registration = registration;
         this.confirmation = confirmation;
+        this.login = login;
+        this.refreshTokens = refreshTokens;
         this.messages = messages;
+        this.clock = clock;
     }
 
     @PostMapping("/register")
@@ -83,6 +101,51 @@ class AuthController {
     ConfirmResponse confirm(@Valid @RequestBody ConfirmRequest request) {
         confirmation.confirm(request.token(), request.password());
         return new ConfirmResponse("ACTIVE");
+    }
+
+    @PostMapping("/login")
+    @SecurityRequirements
+    @Operation(
+            summary = "Entra com e-mail e senha",
+            description = "Devolve o access token (JWT, 15 minutos) no corpo e o refresh token no cookie httpOnly "
+                    + "`refresh_token`, que vale 7 dias. E-mail desconhecido, senha errada e conta ainda não ativada "
+                    + "recebem a mesma resposta, para não revelar contas cadastradas.")
+    @ApiResponse(responseCode = "200", description = "Sessão aberta; o refresh token vai no header `Set-Cookie`")
+    @ApiProblem(status = 401, type = "invalid-credentials",
+            description = "E-mail desconhecido, senha errada ou conta ainda não ativada")
+    ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+        return withSession(login.login(request.email(), request.password()));
+    }
+
+    @PostMapping("/refresh")
+    @SecurityRequirements
+    @Operation(
+            summary = "Renova o access token com o refresh token do cookie",
+            description = "Revoga o refresh token usado e emite outro da mesma família, que mantém a expiração do "
+                    + "login: renovar não estende a sessão além de 7 dias. Um token já usado não funciona de novo.")
+    @ApiResponse(responseCode = "200", description = "Sessão renovada; o novo refresh token vai no header `Set-Cookie`")
+    @ApiProblem(status = 401, type = "invalid-refresh-token",
+            description = "Cookie ausente, ou refresh token desconhecido, expirado ou já usado; o cookie é apagado")
+    ResponseEntity<AuthResponse> refresh(
+            @Parameter(hidden = true)
+            @CookieValue(name = RefreshCookie.NAME, required = false) String refreshToken) {
+        return withSession(refreshTokens.rotate(refreshToken));
+    }
+
+    /** A refused refresh also drops the cookie, so the browser stops sending a token that no longer works. */
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    ResponseEntity<ProblemDetail> invalidRefreshToken(InvalidRefreshTokenException ex) {
+        return ResponseEntity.status(ex.status())
+                .header(HttpHeaders.SET_COOKIE, RefreshCookie.cleared().toString())
+                .body(ex.toProblemDetail());
+    }
+
+    private ResponseEntity<AuthResponse> withSession(AuthSession session) {
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE,
+                        RefreshCookie.of(session.refreshToken(), session.refreshTokenExpiresAt(), clock.instant())
+                                .toString())
+                .body(AuthResponse.from(session));
     }
 
     record RegisterResponse(

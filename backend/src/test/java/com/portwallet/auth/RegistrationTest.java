@@ -65,7 +65,7 @@ class RegistrationTest {
         List<InboxMessage> messages = inbox.findByRecipient(email);
         assertThat(messages).singleElement().satisfies(message -> {
             assertThat(message.subject()).isEqualTo("Ative sua conta PortWallet");
-            assertThat(message.link()).startsWith("http://localhost:5173/confirm#token=");
+            assertThat(message.link()).startsWith("http://localhost:7173/confirm#token=");
             assertThat(message.body())
                     .contains(message.link())
                     .contains("Olá, Ana!")

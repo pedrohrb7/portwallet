@@ -17,7 +17,7 @@ COPY --from=build /app/target/extracted/spring-boot-loader/ ./
 COPY --from=build /app/target/extracted/snapshot-dependencies/ ./
 COPY --from=build /app/target/extracted/application/ ./
 USER app
-EXPOSE 8080
+EXPOSE 7080
 HEALTHCHECK --interval=10s --timeout=3s --start-period=30s --retries=5 \
-    CMD wget -qO- http://localhost:8080/actuator/health/readiness || exit 1
+    CMD wget -qO- http://localhost:7080/actuator/health/readiness || exit 1
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "org.springframework.boot.loader.launch.JarLauncher"]

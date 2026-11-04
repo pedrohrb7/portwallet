@@ -9,4 +9,4 @@ services:
       SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
     ports:
       # Bound to the loopback only, so the console and the API are not reachable from the local network.
-      - "127.0.0.1:8080:8080"
+      - "127.0.0.1:7080:7080"

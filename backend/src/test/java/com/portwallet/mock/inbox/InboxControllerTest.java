@@ -30,7 +30,7 @@ class InboxControllerTest {
         void listsTheMessagesOfOneRecipientNewestFirstWithoutAuthentication() throws Exception {
             String recipient = TestData.uniqueEmail();
             store.save(new Email(recipient, "Primeiro", "corpo 1", null));
-            store.save(new Email(recipient, "Segundo", "corpo 2", "http://localhost:5173/confirm#token=x"));
+            store.save(new Email(recipient, "Segundo", "corpo 2", "http://localhost:7173/confirm#token=x"));
             store.save(new Email(TestData.uniqueEmail(), "De outra pessoa", "corpo", null));
 
             mockMvc.perform(get("/mock/inbox").param("to", recipient.toUpperCase()))
@@ -38,7 +38,7 @@ class InboxControllerTest {
                     .andExpect(jsonPath("$.length()").value(2))
                     .andExpect(jsonPath("$[0].subject").value("Segundo"))
                     .andExpect(jsonPath("$[0].to").value(recipient))
-                    .andExpect(jsonPath("$[0].link").value("http://localhost:5173/confirm#token=x"))
+                    .andExpect(jsonPath("$[0].link").value("http://localhost:7173/confirm#token=x"))
                     .andExpect(jsonPath("$[0].createdAt").exists())
                     .andExpect(jsonPath("$[1].subject").value("Primeiro"));
         }

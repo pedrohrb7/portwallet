@@ -158,5 +158,7 @@ O GitHub Actions roda a cada push no `main`. Um primeiro job detecta o que mudou
 | **Frontend** | Lint, formatação, tipos, testes unitários e build | `frontend/` |
 | **E2E** | Playwright em Chromium e Firefox contra o backend; o relatório HTML é publicado como artefato | `backend/` ou `frontend/` |
 | **Docker** | Sobe o `docker compose` e verifica o health pela borda do Nginx | `backend/`, `frontend/` ou `docker-compose.yml` |
+| **Imagens** | Gera `portwallet-api` e `portwallet-web` e as publica no GHCR, com as tags `latest` e o SHA do commit | `backend/` ou `frontend/` |
+| **Deploy** | Aponta os serviços da demo na VPS para as novas imagens, a API primeiro ([ADR 0010](docs/adr/0010-build-and-deploy-from-github-actions.md)) | `backend/` ou `frontend/` |
 
-Qualquer mudança no próprio workflow (`.github/workflows/ci.yml`) roda todos os jobs. Um job pulado aparece como "skipped", e o E2E roda mesmo que o backend ou o frontend tenham sido pulados, desde que nenhum job executado tenha falhado.
+Qualquer mudança no próprio workflow (`.github/workflows/ci.yml`) roda todos os jobs. Um job pulado aparece como "skipped", e o E2E roda mesmo que o backend ou o frontend tenham sido pulados, desde que nenhum job executado tenha falhado. Imagens e Deploy seguem a mesma regra, depois do E2E e do Docker: nada é publicado nem implantado quando uma verificação executada falhou.

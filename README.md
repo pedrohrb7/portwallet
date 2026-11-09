@@ -158,5 +158,7 @@ GitHub Actions runs on every push to `main`. A first job detects what changed, a
 | **Frontend** | Lint, formatting, types, unit tests and build | `frontend/` |
 | **E2E** | Playwright in Chromium and Firefox against the backend; the HTML report is published as an artifact | `backend/` or `frontend/` |
 | **Docker** | Starts `docker compose` and checks health through the Nginx edge | `backend/`, `frontend/` or `docker-compose.yml` |
+| **Images** | Builds `portwallet-api` and `portwallet-web` and pushes them to GHCR, tagged `latest` and with the commit SHA | `backend/` or `frontend/` |
+| **Deploy** | Points the demo's services on the VPS to the new images, the API first ([ADR 0010](docs/adr/0010-build-and-deploy-from-github-actions.md)) | `backend/` or `frontend/` |
 
-Any change to the workflow itself (`.github/workflows/ci.yml`) runs every job. A skipped job shows as "skipped", and E2E runs even if the backend or frontend jobs were skipped, as long as no job that ran has failed.
+Any change to the workflow itself (`.github/workflows/ci.yml`) runs every job. A skipped job shows as "skipped", and E2E runs even if the backend or frontend jobs were skipped, as long as no job that ran has failed. Images and Deploy follow the same rule, after E2E and Docker: nothing is published or deployed when a check that ran has failed.

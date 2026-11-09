@@ -144,3 +144,78 @@ jobs:
         run: docker compose logs
       - if: always()
         run: docker compose down
+
+  images:
+    name: Imagens (build e push)
+    needs: [changes, backend, frontend, e2e, docker]
+    # Same rule as the E2E job: run when the app changed, as long as no check that ran failed.
+    # Only main publishes, even if the workflow later gains other triggers.
+    if: >-
+      always() &&
+      github.ref == 'refs/heads/main' &&
+      needs.changes.outputs.app == 'true' &&
+      !contains(needs.*.result, 'failure') &&
+      !contains(needs.*.result, 'cancelled')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - image: portwallet-api
+            context: backend
+            build_args: ""
+          - image: portwallet-web
+            context: frontend
+            # Public demo: shows the simulated inbox, there is no real e-mail.
+            build_args: VITE_DEMO_INBOX=true
+    steps:
+      - uses: actions/checkout@v7
+      # Third-party actions pinned to the commit of their release, like dorny/paths-filter above.
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          build-args: ${{ matrix.build_args }}
+          tags: |
+            ghcr.io/pedrohrb7/${{ matrix.image }}:latest
+            ghcr.io/pedrohrb7/${{ matrix.image }}:${{ github.sha }}
+          labels: org.opencontainers.image.source=https://github.com/pedrohrb7/portwallet
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  deploy:
+    name: Deploy (VPS)
+    needs: images
+    if: always() && github.ref == 'refs/heads/main' && needs.images.result == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+      url: https://portwallet.pedrohrb.dev
+    steps:
+      - name: Configure SSH
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          # The VPS's ED25519 host key (public), pinned so a spoofed host is refused.
+          echo '72.60.254.220 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGJZIu9jFy2GVohPM/Q240HFzMpD2Y6O17AhagayXGHN' > ~/.ssh/known_hosts
+      # The deploy user accepts a single "deploy <service> <image>" command per connection.
+      # The API goes first: the web container only proxies to it.
+      - name: Deploy API
+        run: >-
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes deploy@72.60.254.220
+          "deploy portwallet_api ghcr.io/pedrohrb7/portwallet-api:${{ github.sha }}"
+      - name: Deploy web
+        run: >-
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes deploy@72.60.254.220
+          "deploy portwallet_web ghcr.io/pedrohrb7/portwallet-web:${{ github.sha }}"

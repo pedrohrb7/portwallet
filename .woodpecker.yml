@@ -1,0 +1,75 @@
+# Builds the backend and frontend images on the VPS's Woodpecker CI, pushes them to GHCR and
+# deploys them to Docker Swarm. Tests stay in GitHub Actions (.github/workflows/ci.yml).
+# See docs/adr/0009-deploy-with-woodpecker-and-swarm.md.
+when:
+  - event: push
+    branch: main
+    path:
+      exclude:
+        - "docs/**"
+        - "**/*.md"
+        - ".github/**"
+  - event: manual
+
+steps:
+  - name: build-api
+    image: woodpeckerci/plugin-docker-buildx:6.1.2 # must match WOODPECKER_PLUGINS_PRIVILEGED on the server
+    settings:
+      registry: ghcr.io
+      repo: ghcr.io/pedrohrb7/portwallet-api
+      context: backend
+      dockerfile: backend/Dockerfile
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA}
+      labels:
+        - org.opencontainers.image.source=https://github.com/pedrohrb7/portwallet
+      username: pedrohrb7
+      password:
+        from_secret: ghcr_token
+
+  - name: build-web
+    image: woodpeckerci/plugin-docker-buildx:6.1.2
+    settings:
+      registry: ghcr.io
+      repo: ghcr.io/pedrohrb7/portwallet-web
+      context: frontend
+      dockerfile: frontend/Dockerfile
+      # Must be a map with string values: the plugin parses build_args as JSON, so a "KEY=value" list or an
+      # unquoted boolean never reaches the build as VITE_DEMO_INBOX.
+      build_args:
+        VITE_DEMO_INBOX: "true" # public demo: shows the simulated inbox, there is no real e-mail
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA}
+      labels:
+        - org.opencontainers.image.source=https://github.com/pedrohrb7/portwallet
+      username: pedrohrb7
+      password:
+        from_secret: ghcr_token
+
+  # The deploy user accepts a single "deploy <service> <image>" command, so each service gets its own step.
+  # The API goes first: the web container only proxies to it.
+  - name: deploy-api
+    image: appleboy/drone-ssh:1.8.4
+    settings:
+      host:
+        from_secret: deploy_host
+      username: deploy
+      key:
+        from_secret: deploy_ssh_key
+      fingerprint: SHA256:CbqqQYHTcc3zpM6NkwihyIIgLv6RXLh4H17EKUgR2EQ # the VPS's ED25519 host key
+      script:
+        - deploy portwallet_api ghcr.io/pedrohrb7/portwallet-api:${CI_COMMIT_SHA}
+
+  - name: deploy-web
+    image: appleboy/drone-ssh:1.8.4
+    settings:
+      host:
+        from_secret: deploy_host
+      username: deploy
+      key:
+        from_secret: deploy_ssh_key
+      fingerprint: SHA256:CbqqQYHTcc3zpM6NkwihyIIgLv6RXLh4H17EKUgR2EQ # the VPS's ED25519 host key
+      script:
+        - deploy portwallet_web ghcr.io/pedrohrb7/portwallet-web:${CI_COMMIT_SHA}

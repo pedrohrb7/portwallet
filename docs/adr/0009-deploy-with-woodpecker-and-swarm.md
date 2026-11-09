@@ -4,7 +4,7 @@ Date: 2026-11-09
 
 ## Status
 
-Accepted.
+Superseded by [ADR 0010](0010-build-and-deploy-from-github-actions.md).
 
 ## Context
 

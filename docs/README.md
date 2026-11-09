@@ -84,3 +84,4 @@ The table order is the Phase 2 implementation order: each feature depends only o
 | [0007](adr/0007-multilingual-product.md) | Multilingual product |
 | [0008](adr/0008-exposed-ports-in-7xxx-range.md) | Exposed ports in the 7xxx range |
 | [0009](adr/0009-deploy-with-woodpecker-and-swarm.md) | Deploy with Woodpecker CI and Docker Swarm |
+| [0010](adr/0010-build-and-deploy-from-github-actions.md) | Build and deploy from GitHub Actions |
